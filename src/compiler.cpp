@@ -2,13 +2,42 @@
 #include "parser.hpp"
 #include "nodes.hpp"
 #include <cstdio>
+#include <cassert>
+#include <cstring>
 
-void compile(char const* path) {
-	(void) path;
-
+int lex(char const* path) {
 	FILE* in = fopen(path, "r");
 	if (in == nullptr) {
-		return;
+		printf("[error] unable to open file: %s\n", std::strerror(errno));
+		return 1;
+	}
+
+	yyscan_t lexer;
+	yylex_init_extra(1, &lexer);
+
+	yyset_in(in, lexer);
+
+	while (true) {
+		yy::parser::symbol_type s;
+		int x = yylex(&s, nullptr, lexer);
+		assert(x == 1);
+		printf("[output] lexer got symbol: %s.\n", s.name());
+		if (s.kind() == yy::parser::symbol_kind_type::S_YYEOF) {
+			break;
+		}
+	}
+
+	yylex_destroy(lexer);
+	fclose(in);
+
+	return 0;
+}
+
+int parse(char const* path) {
+	FILE* in = fopen(path, "r");
+	if (in == nullptr) {
+		printf("[error] unable to open file: %s\n", std::strerror(errno));
+		return 1;
 	}
 
 	yyscan_t lexer;
@@ -23,4 +52,6 @@ void compile(char const* path) {
 
 	yylex_destroy(lexer);
 	fclose(in);
+
+	return 0;
 }

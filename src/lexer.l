@@ -4,10 +4,11 @@
 
 #include "bridge.hpp"
 
-#define SET_COLUMN(x) yyset_extra(x, yyscanner)
-#define INC_COLUMN(x) yyset_extra(yyget_extra(yyscanner) + x, yyscanner)
+#define GET_COLUMN() yyget_extra(yyscanner)
+#define SET_COLUMN(x) yyset_extra((x), yyscanner)
+#define INC_COLUMN(x) yyset_extra(GET_COLUMN() + (x), yyscanner)
 
-#define LOC() (yy::parser::location_type { nullptr, yylineno, yyget_extra(yyscanner) })
+#define LOC() (yy::parser::location_type { nullptr, yylineno, GET_COLUMN() })
 
 #define TOK(t, ...) \
 	make_symbol(yylval, yy::parser::make_ ##t (__VA_ARGS__ __VA_OPT__(,) LOC()))
@@ -41,7 +42,7 @@ DIGIT [0-9]
 
 {WS} { /* pass */ }
 
-{DIGIT} { INC_COLUMN(2); return TOK(HI, "hi"); }
+{DIGIT} { INC_COLUMN(2); return TOK(HI, std::string { yytext, static_cast<size_t>(yyleng) }); }
 
 . { printf("[error] invalid token.\n"); return TOK(YYUNDEF); }
 

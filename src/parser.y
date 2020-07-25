@@ -34,17 +34,16 @@ static yy::parser::symbol_type yylex(yyscan_t);
 %define parse.assert
 
 %token <std::string> HI
+%token BYE
 
-/*
 %type <Node*> root
-*/
 
 %start root
 
 %%
 
 root
-	: declarations
+	: declarations { $$ = nullptr; }
 	;
 
 declarations
@@ -62,7 +61,6 @@ yy::parser::symbol_type yylex(yyscan_t lexer) {
 	yy::parser::symbol_type s;
 	int x = yylex(&s, nullptr, lexer);
 	assert(x == 1);
-	printf("[debug] got symbol %d (%s).\n", s.kind(), s.name());
 	return s;
 }
 
