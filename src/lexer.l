@@ -19,6 +19,8 @@ static int make_symbol(YYSTYPE*, YYSTYPE);
 
 %}
 
+/* see https://westes.github.io/flex/manual/Scanner-Options.html */
+
 %option header-file="lexer.h"
 
 %option yylineno

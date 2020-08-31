@@ -7,6 +7,8 @@
 typedef void* yyscan_t;
 #endif
 
+#include <memory>
+
 class Node;
 
 }
@@ -20,13 +22,17 @@ class Node;
 
 static yy::parser::symbol_type yylex(yyscan_t);
 
+template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::parser::location_type const&, Args&&...);
+
 }
+
+/* see https://www.gnu.org/software/bison/manual/html_node/Declarations.html */
 
 %require "3.6"
 %language "c++"
 %locations
 %param { yyscan_t lexer }
-%parse-param { Node** root }
+%parse-param { std::unique_ptr<Node>& root }
 %verbose
 %define api.value.type variant
 %define api.token.constructor
@@ -66,4 +72,10 @@ yy::parser::symbol_type yylex(yyscan_t lexer) {
 
 void yy::parser::error(location_type const& loc, std::string const& msg) {
 	std::cout << "[error] parser error at " << loc << ": " << msg << ".\n";
+}
+
+template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::parser::location_type const& loc, Args&&... args) {
+	std::unique_ptr<T> n = std::make_unique<T>(std::forward<Args>(args)...);
+	n->location = loc;
+	return n;
 }

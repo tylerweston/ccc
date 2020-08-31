@@ -2,6 +2,7 @@
 
 set(SOURCES
 	compiler.cpp
+	nodes.cpp
 	)
 
 find_package(FLEX)
@@ -37,6 +38,7 @@ target_link_libraries(ece467 PUBLIC ${llvm_libs})
 add_executable(ece467c
 	main.cpp
 	)
-
+target_include_directories(ece467c PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(ece467c PRIVATE ${CMAKE_BINARY_DIR}/src)
 target_link_libraries(ece467c ece467)
 target_include_directories(ece467c PRIVATE ${CMAKE_SOURCE_DIR}/src)
