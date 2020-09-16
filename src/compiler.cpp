@@ -29,7 +29,7 @@ int lex(char const* path) {
 		yy::parser::symbol_type s;
 		int x = yylex(&s, nullptr, lexer);
 		assert(x == 1);
-		printf("[output] lexer got symbol: %s.\n", s.name());
+		printf("[output] lexer got symbol: %s (%d, %d).\n", s.name(), s.location.begin.line, s.location.begin.column);
 		if (s.kind() == yy::parser::symbol_kind_type::S_YYEOF) {
 			break;
 		}
