@@ -8,12 +8,12 @@
 #define SET_COLUMN(x) yyset_extra((x), yyscanner)
 #define INC_COLUMN(x) yyset_extra(GET_COLUMN() + (x), yyscanner)
 
-#define LOC() (yy::parser::location_type { nullptr, yylineno, GET_COLUMN() })
+#define LOC(x) (yy::parser::location_type { nullptr, yylineno, (x) })
 
-#define TOK(t, ...) \
-	make_symbol(yylval, yy::parser::make_ ##t (__VA_ARGS__ __VA_OPT__(,) LOC()))
+#define TOK(t, x, ...) \
+	make_symbol(yylval, yy::parser::make_ ##t (__VA_ARGS__ __VA_OPT__(,) LOC(x)))
 
-#define yyterminate() return TOK(YYEOF)
+#define yyterminate() return TOK(YYEOF, GET_COLUMN())
 
 static int make_symbol(YYSTYPE*, YYSTYPE);
 
@@ -44,9 +44,9 @@ DIGIT [0-9]
 
 {WS} { /* pass */ }
 
-{DIGIT} { INC_COLUMN(2); return TOK(HI, std::string { yytext, static_cast<size_t>(yyleng) }); }
+{DIGIT} { int x = GET_COLUMN(); INC_COLUMN(2); return TOK(HI, x, std::string { yytext, static_cast<size_t>(yyleng) }); }
 
-. { printf("[error] invalid token.\n"); return TOK(YYUNDEF); }
+. { printf("[error] invalid token.\n"); return TOK(YYUNDEF, GET_COLUMN()); }
 
 %%
 
