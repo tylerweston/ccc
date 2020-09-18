@@ -3,6 +3,7 @@
 // this will be added to the top of your lexer.c file
 
 #include "bridge.hpp"
+#include <math.h>
 
 #define GET_COLUMN() yyget_extra(yyscanner)
 #define SET_COLUMN(x) yyset_extra((x), yyscanner)
@@ -39,10 +40,44 @@ static int make_symbol(YYSTYPE*, YYSTYPE);
 
 WS [ \r\n\t]+
 DIGIT [0-9]
+LETTER [a-zA-Z]
 
 %%
 
 {WS} { /* pass */ }
+
+{LETTER}|"-"({LETTER}|{DIGIT}|"_")+ { return TOK(TOK_IDENTIFIER, std::string { yytext, static_cast<size_t>(yyleng)}); }
+{DIGIT}+ { return TOK(TOK_INTEGER_LITERAL, atoi(yytext)); }
+{DIGIT}+"."{DIGIT}+ { return TOK(TOK_FLOAT_LITERAL, atof(yytext)); }
+true { return TOK(TOK_BOOLEAN_LITERAL, true); }
+false { return TOK(TOK_BOOLEAN_LITERAL, false); }
+"(" { return TOK(TOK_LPAREN); }
+")" { return TOK(TOK_RPAREN); }
+"{" { return TOK(TOK_LBRACE); }
+"}" { return TOK(TOK_RBRACE); }
+"==" { return TOK(TOK_EQ); }
+"!=" { return TOK(TOK_NE); }
+"<" { return TOK(TOK_LT); }
+">" { return TOK(TOK_GT); }
+"<=" { return TOK(TOK_LE); }
+">=" { return TOK(TOK_GE); }
+"+" { return TOK(TOK_PLUS); }
+"-" { return TOK(TOK_MINUS); }
+"*" { return TOK(TOK_STAR); }
+"/" { return TOK(TOK_SLASH); }
+"&&" { return TOK(TOK_LOG_AND); }
+"||" { return TOK(TOK_LOG_OR); }
+"if" { return TOK(TOK_IF); }
+"while" { return TOK(TOK_WHILE); }
+"for" { return TOK(TOK_FOR); }
+"break" { return TOK(TOK_BREAK); }
+"continue" { return TOK(TOK_CONTINUE); }
+"return" { return TOK(TOK_RETURN); }
+"," { return TOK(TOK_COMMA); }
+";" {return TOK(TOK_SEMICOLON); }
+":" { return TOK(TOK_COLON); }
+"?" { return TOK(TOK_QUESTION_MARK); }
+
 
 {DIGIT} { INC_COLUMN(2); return TOK(HI, std::string { yytext, static_cast<size_t>(yyleng) }); }
 

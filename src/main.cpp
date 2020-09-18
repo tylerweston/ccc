@@ -1,6 +1,6 @@
 /*
  * UofT ECE 467
- * - student number, first name, last name
+ * - 997438170, Tyler, Weston
  * - student number, first name, last name
  */
 

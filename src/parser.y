@@ -39,6 +39,40 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 %define parse.trace
 %define parse.assert
 
+/* Define our tokens here */
+
+%token <std::string> TOK_IDENTIFIER
+%token <int> TOK_INTEGER_LITERAL
+%token <float> TOK_FLOAT_LITERAL
+%token <bool> TOK_BOOLEAN_LITERAL
+%token TOK_LPAREN
+%token TOK_RPAREN
+%token TOK_LBRACE
+%token TOK_RBRACE
+%token TOK_EQ
+%token TOK_NE
+%token TOK_LT
+%token TOK_GT
+%token TOK_LE
+%token TOK_GE
+%token TOK_PLUS
+%token TOK_MINUS
+%token TOK_STAR
+%token TOK_SLASH
+%token TOK_LOG_AND
+%token TOK_LOG_OR
+%token TOK_IF
+%token TOK_WHILE
+%token TOK_FOR
+%token TOK_BREAK
+%token TOK_CONTINUE
+%token TOK_RETURN
+%token TOK_COMMA
+%token TOK_SEMICOLON
+%token TOK_COLON
+%token TOK_QUESTION_MARK
+%token TOK_ASSIGN
+
 %token <std::string> HI
 %token BYE
 
