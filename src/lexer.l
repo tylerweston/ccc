@@ -3,18 +3,27 @@
 // this will be added to the top of your lexer.c file
 
 #include "bridge.hpp"
-#include <math.h>
+#include <string>
+#include "nodes.hpp"	// so we can use our enum class (??)
 
 #define GET_COLUMN() yyget_extra(yyscanner)
 #define SET_COLUMN(x) yyset_extra((x), yyscanner)
 #define INC_COLUMN(x) yyset_extra(GET_COLUMN() + (x), yyscanner)
 
-#define LOC() (yy::parser::location_type { nullptr, yylineno, GET_COLUMN() })
+#define LOC(x) (yy::parser::location_type { nullptr, yylineno, (x) })
 
-#define TOK(t, ...) \
-	make_symbol(yylval, yy::parser::make_ ##t (__VA_ARGS__ __VA_OPT__(,) LOC()))
+#define TOK(t, x, ...) \
+	make_symbol(yylval, yy::parser::make_ ##t (__VA_ARGS__ __VA_OPT__(,) LOC(x)))
 
-#define yyterminate() return TOK(YYEOF)
+// macro to take care of column tracking for us, take optional extra data
+#define GEN_TOK(tok_name, ...) \
+do { \
+	int x = GET_COLUMN(); \
+	INC_COLUMN(yyleng); \
+	return TOK(tok_name, x __VA_OPT__(,) __VA_ARGS__); \
+} while(0);
+
+#define yyterminate() return TOK(YYEOF, GET_COLUMN())
 
 static int make_symbol(YYSTYPE*, YYSTYPE);
 
@@ -38,50 +47,76 @@ static int make_symbol(YYSTYPE*, YYSTYPE);
 %option verbose
 %option warn
 
-WS [ \r\n\t]+
+WS [ \r\t]+
 DIGIT [0-9]
 LETTER [a-zA-Z]
 
+REGEX_IDENTIFIER ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
+
+REGEX_FLOAT_EXPONENT ([eEpP][+-]?{DIGIT}+)
+REGEX_FLOAT1 ({DIGIT}+{REGEX_FLOAT_EXPONENT})
+REGEX_FLOAT2 ({DIGIT}+"."{REGEX_FLOAT_EXPONENT}?)
+REGEX_FLOAT3 ({DIGIT}*"."{DIGIT}+{REGEX_FLOAT_EXPONENT}?)
+REGEX_FLOAT {REGEX_FLOAT1}|{REGEX_FLOAT2}|{REGEX_FLOAT3}
+
+REGEX_INTEGER {DIGIT}+
+
 %%
 
-{WS} { /* pass */ }
+"\n" { SET_COLUMN(1); }
+{WS} { INC_COLUMN(yyleng); }
 
-{LETTER}|"-"({LETTER}|{DIGIT}|"_")+ { return TOK(TOK_IDENTIFIER, std::string { yytext, static_cast<size_t>(yyleng)}); }
-{DIGIT}+ { return TOK(TOK_INTEGER_LITERAL, atoi(yytext)); }
-{DIGIT}+"."{DIGIT}+ { return TOK(TOK_FLOAT_LITERAL, atof(yytext)); }
-true { return TOK(TOK_BOOLEAN_LITERAL, true); }
-false { return TOK(TOK_BOOLEAN_LITERAL, false); }
-"(" { return TOK(TOK_LPAREN); }
-")" { return TOK(TOK_RPAREN); }
-"{" { return TOK(TOK_LBRACE); }
-"}" { return TOK(TOK_RBRACE); }
-"==" { return TOK(TOK_EQ); }
-"!=" { return TOK(TOK_NE); }
-"<" { return TOK(TOK_LT); }
-">" { return TOK(TOK_GT); }
-"<=" { return TOK(TOK_LE); }
-">=" { return TOK(TOK_GE); }
-"+" { return TOK(TOK_PLUS); }
-"-" { return TOK(TOK_MINUS); }
-"*" { return TOK(TOK_STAR); }
-"/" { return TOK(TOK_SLASH); }
-"&&" { return TOK(TOK_LOG_AND); }
-"||" { return TOK(TOK_LOG_OR); }
-"if" { return TOK(TOK_IF); }
-"while" { return TOK(TOK_WHILE); }
-"for" { return TOK(TOK_FOR); }
-"break" { return TOK(TOK_BREAK); }
-"continue" { return TOK(TOK_CONTINUE); }
-"return" { return TOK(TOK_RETURN); }
-"," { return TOK(TOK_COMMA); }
-";" {return TOK(TOK_SEMICOLON); }
-":" { return TOK(TOK_COLON); }
-"?" { return TOK(TOK_QUESTION_MARK); }
+if { GEN_TOK(TOK_IF); }
+while { GEN_TOK(TOK_WHILE); }
+for { GEN_TOK(TOK_FOR); }
+break { GEN_TOK(TOK_BREAK); }
+continue { GEN_TOK(TOK_CONTINUE); }
+return { GEN_TOK(TOK_RETURN); }
 
+int { GEN_TOK(TOK_TYPE, TypeName::tInt); }
+float { GEN_TOK(TOK_TYPE, TypeName::tFloat); }
+bool { GEN_TOK(TOK_TYPE, TypeName::tBool); }
+void { GEN_TOK(TOK_TYPE, TypeName::tVoid); }
 
-{DIGIT} { INC_COLUMN(2); return TOK(HI, std::string { yytext, static_cast<size_t>(yyleng) }); }
+true { GEN_TOK(TOK_TRUE); }
+false { GEN_TOK(TOK_FALSE); }
 
-. { printf("[error] invalid token.\n"); return TOK(YYUNDEF); }
+{REGEX_IDENTIFIER} { GEN_TOK(TOK_IDENTIFIER, std::string { yytext, static_cast<size_t>(yyleng)}); }
+{REGEX_FLOAT} { GEN_TOK(TOK_FLOAT, std::stof(yytext)); }			
+{REGEX_INTEGER} { GEN_TOK(TOK_INTEGER, std::stoi(yytext)); }
+
+"\(" { GEN_TOK(TOK_LPAREN); }
+"\)" { GEN_TOK(TOK_RPAREN); }
+"{" { GEN_TOK(TOK_LBRACE); }
+"}" { GEN_TOK(TOK_RBRACE); }
+
+"!=" { GEN_TOK(TOK_NE); }
+"==" { GEN_TOK(TOK_EQ); }
+"<" { GEN_TOK(TOK_LT); }
+">" { GEN_TOK(TOK_GT); }
+"<=" { GEN_TOK(TOK_LE); }
+">=" { GEN_TOK(TOK_GE); }
+
+"+=" {GEN_TOK(TOK_PLUS_ASSIGN); }
+"-=" {GEN_TOK(TOK_MINUS_ASSIGN); }
+"*=" {GEN_TOK(TOK_STAR_ASSIGN); }
+"/=" {GEN_TOK(TOK_SLASH_ASSIGN); }
+
+"\+" { GEN_TOK(TOK_PLUS); }
+"-" { GEN_TOK(TOK_MINUS); }
+"\*" { GEN_TOK(TOK_STAR); }
+"/" { GEN_TOK(TOK_SLASH); }
+
+"&&" { GEN_TOK(TOK_LOG_AND); }
+"||" { GEN_TOK(TOK_LOG_OR); }
+
+"," { GEN_TOK(TOK_COMMA); }
+";" {GEN_TOK(TOK_SEMICOLON); }
+":" { GEN_TOK(TOK_COLON); }
+"\?" { GEN_TOK(TOK_QUESTION_MARK); }
+"=" { GEN_TOK(TOK_ASSIGN); }
+
+. { printf("[error] invalid token.\n"); return TOK(YYUNDEF, GET_COLUMN()); }
 
 %%
 

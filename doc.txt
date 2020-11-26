@@ -1,0 +1,50 @@
+Tyler Weston
+997438170
+
+LAB 3
+
+Oh boy, that was a good one.
+Between figuring out the visitor design pattern, designing an AST that made sense (somewhat),
+sorting out the symbol table and function table, and then figuring out optimization, I think
+I probably put over 50 hours into this. Well, luckily it MOSTLY works now! Passes all the 
+provided test cases and the extra ones I rolled up myself.
+
+Maybe interesting or fun design decisions:
+ - The optimization pass keeps track of if it's altered the tree or not, so will 
+   potentially make many optimization passes until it has gotten through the tree
+   without changing anything, ensuring MAXIMUM OPTIMIZATION
+ - I'm sure there is more fun templating stuff I could do to make the optimization
+   pass a bit better, but I couldn't really manage it in the time I allotted myself.
+   The relational op, binary op, and logical op functions are particularily unpleasant.
+   I managed to at least abstract out the math and relational operators at least so
+   that the floats and int could use the same templated classes and then held a ref-
+   erence to those functions in a std::function to avoid having to write exponentially
+   many paths (one per data type per operator). I still think there is a better way
+   to handle deciding which type of data the function is operating on and deciding
+   which type of Node to generate.
+ - In fact, the entire process of optimizing seems a bit wonky with the visitor pattern.
+   I ended up having to basically make the children nodes optimize themselves, store 
+   themselves somewhere in the visitor, and then pass a flag upwards to let their 
+   parents know that they've changed. I couldn't find an elegant way to replace a node
+   with a different node while INSIDE that node in the visitor.
+ - The symbol tables and function tables are written in a way that they should be 
+   easily extendable if we need to add any other info or fields or anything to them
+   for Lab 4, by adding fields to SymbolTableEntry and FunctionTableEntry.
+ - I tried to move the header files to an "../include/" folder under "/src", but I'm
+   not enough of a CMake wiz to figure out how to change that up, so I stuck with 
+   the structure given in the lab, of the .cpp and .hpp files being in the "/src" dir.
+ - I should have probably called "vevaluate" "vverify" (the v is for visitor). Orig-
+   inally, I had it split into two passes, so evaluate would fill in information in 
+   the symbol/function table and AST, then verify would do the error checking. As I 
+   started writing more of evaluation, I noticed I could do more and more of the error
+   checking while evaluating the AST. Eventually, there was nothing left for verify
+   to do, so now "vevaluate" also does the semantic error checking.
+ - Oh ya, the print visitor is a mess. Please don't even look at that code. I'm sort
+   of embarrased by it. I had "clean up vprint.cpp" on my todo list for a long time
+   but don't really have time for it now. Maybe I'll try to clean it up for lab 4
+   or at some point in the future. I couldn't come up with a cleaner solution without
+   wrapping std::couts in a macro along with the indent() and then I had to figure out
+   how to parse arbitrary iostreams with a macro or something like that. oi vay.
+
+Total new lines of code written in lab 3 (not counting changes to parser.y):
+   2659

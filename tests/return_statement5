@@ -1,0 +1,11 @@
+
+bool foo() {
+    if (true) {
+        return true;
+    }
+    return 1;
+}
+
+int main() {
+    return 0;
+}

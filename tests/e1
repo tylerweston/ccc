@@ -1,0 +1,9 @@
+
+void foo();
+
+int main() {
+    if (true) {
+        foo();
+    }
+    return 0;
+}

@@ -1,0 +1,9 @@
+
+void foo();
+
+int main() {
+    while (foo()) {
+        return 1;
+    }
+    return 0;
+}

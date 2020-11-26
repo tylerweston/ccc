@@ -1,7 +1,21 @@
+// Given
 #include "compiler.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+
+// Common
 #include "nodes.hpp"
+#include "common.hpp"
+
+// Visitors
+#include "vprint.hpp"
+#include "voptimize.hpp"
+#include "vevaluate.hpp"
+
+// Symbol & Function table
+#include "symtable.hpp"
+
+// LLVM
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/FileSystem.h"
@@ -9,6 +23,8 @@
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
+
+// Standard Libraries.
 #include <cstdio>
 #include <cassert>
 #include <cstring>
@@ -63,19 +79,59 @@ int parse(char const* path, std::unique_ptr<Node>& root) {
 }
 
 bool verify_ast(Node* root) {
-	(void) root;
-	// TODO: lab 3
-	return true;
+	// Semantic check of our generated AST
+
+	// create our symbol table and function table
+	// if we need this for code gen or anything it can be pushed up a level
+	// and just passed in as a parameter here or a something.
+	SymbolTable* symbolTable = new SymbolTable();
+	FunctionTable* functionTable = new FunctionTable();
+
+	// Create our semantic analyzer visitor
+	EvaluateVisitor evaluateVisitor;
+	evaluateVisitor.symbolTable = symbolTable;
+	evaluateVisitor.functionTable = functionTable;
+	root->accept(&evaluateVisitor);
+
+	// Make sure we got a main function and that it returns an int
+	FunctionTableEntry* mainf = evaluateVisitor.functionTable->GetFunction("main");
+	if (mainf == nullptr)
+	{
+		printf("Error: No main function found\n");
+		exit(1);
+	}
+	if (mainf->ReturnType != TypeName::tInt)	// this is already checked in evaluate?
+	{
+		printf("Error: Main function needs return type int\n");
+		exit(1);
+	}
+	// Clean up our symbol table and function table
+	symbolTable->CleanUpSymbolTable();
+	functionTable->CleanUpFunctionTable();
+	delete(symbolTable);
+	delete(functionTable);
+
+	return true;	// if we get here, we haven't hit any semantic errors
 }
 
 std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) {
-	// TODO: lab 3; return a new tree
+	// Optimize our AST by performing some simplifications
+	OptimizeVisitor optimizeVisitor;
+
+	do
+	{
+		optimizeVisitor.cleanTree = true;
+		root->accept(&optimizeVisitor);
+	}
+	while (!optimizeVisitor.cleanTree);	// repeat until we iterate through the tree
+										// without making any changes to it
 	return root;
 }
 
 void print_ast(Node* root) {
-	// TODO: lab 3
-	(void) root;
+	// Use Visitor pattern to print our generated AST
+	PrintVisitor printVisitor;
+	root->accept(&printVisitor);
 	return;
 }
 
@@ -84,10 +140,10 @@ std::unique_ptr<CompilationUnit> compile(Node* root) {
 	if (!unit->process(root)) {
 		return nullptr;
 	}
-	std::optional<llvm::Error> e = unit->build();
-	if (e) {
-		return nullptr;
-	}
+	// std::optional<llvm::Error> e = unit->build();
+	// if (e) {
+	// 	return nullptr;
+	// }
 	return unit;
 }
 
@@ -109,7 +165,8 @@ bool CompilationUnit::process(Node* root) {
 std::error_code CompilationUnit::dump(std::string path) {
 	std::error_code ec;
 	llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OpenFlags::F_None);
-	llvm::WriteBitcodeToFile(*this->module, out);
+	// llvm::WriteBitcodeToFile(*this->module, out);
+	this->module->print(out, nullptr);
 	return ec;
 }
 

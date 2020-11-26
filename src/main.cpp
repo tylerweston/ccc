@@ -1,7 +1,6 @@
 /*
  * UofT ECE 467
  * - 997438170, Tyler, Weston
- * - student number, first name, last name
  */
 
 #include "compiler.hpp"
@@ -58,8 +57,13 @@ int main(int argc, char** argv) {
 		}
 		root = optimize(std::move(root));
 		std::unique_ptr<CompilationUnit> u = compile(root.get());
+		if (u == nullptr)
+		{
+			printf("[error] failed to compile.\n");
+			return 1;
+		}
 		u->dump(argv[2] + ".ll"s);
-		return u->run(argc - 2, argv + 2);
+		return 0; 	// u->run(argc - 2, argv + 2); changes as per Lab 4 update.
 	} else {
 		printf("[error] invalid lab.\n");
 		return 1;

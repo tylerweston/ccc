@@ -1,0 +1,39 @@
+
+void foo();
+
+int main() {
+    int x = 0;
+    if (true) {
+        int x = 1;
+        foo();
+    }
+
+    if (false) {
+        int x = 2;
+        foo();
+    }
+
+    while (true && ((bool) 0)) {
+        int x = 3;
+        foo();
+    }
+
+    while (true) {
+        int x = 4;
+        int y = 5;
+    }
+
+    for (;;) {
+        int x = 3.14 == 3.0 ? 6 : 7;
+        foo();
+    }
+
+    for (int i = 0; 3 > 4; i += 1) {
+        if (true) {
+            int x = 8;
+        }
+        foo();
+    }
+
+    return 4 > 3 ? 0 : 1;
+}

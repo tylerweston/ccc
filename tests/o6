@@ -1,0 +1,8 @@
+
+bool foo() {
+    return (bool) 1.5; 
+}
+
+int main() {
+    return 0;
+}

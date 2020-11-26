@@ -2,8 +2,12 @@
 
 set(SOURCES
 	compiler.cpp
+	common.cpp
 	nodes.cpp
-	runtime.cpp
+	vevaluate.cpp
+	vprint.cpp
+	voptimize.cpp
+	symtable.cpp
 	)
 
 find_package(FLEX)
@@ -45,3 +49,5 @@ target_include_directories(ece467c PRIVATE ${CMAKE_BINARY_DIR}/src)
 target_link_libraries(ece467c PUBLIC -rdynamic)
 target_link_libraries(ece467c PUBLIC ece467)
 target_include_directories(ece467c PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+add_library(ece467rt SHARED runtime.cpp)
