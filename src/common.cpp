@@ -34,6 +34,7 @@ llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 		case TypeName::tBool:
 			return builder->getInt1Ty();
 		default:
+			// TODO: llvm unreachable
 			return builder->getInt32Ty();
 	}
 }
@@ -52,6 +53,7 @@ std::string TypeNameString(TypeName t)
 		case TypeName::tBool:
 			return "bool";
 		default:
+			// TODO: llvm unreachable
 			return "int";
 	}
 }

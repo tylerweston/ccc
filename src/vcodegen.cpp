@@ -76,9 +76,15 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 
 	// Generate our parameter LLVM types from our AST parameter types
 	std::vector<llvm::Type*> parameters;
-	for (auto decl : n->params)
-	{	
-		parameters.push_back(GetLLVMType(decl->t, this->builder*));
+	// for (auto decl : n->params)
+	// {	
+	// 	parameters.push_back(GetLLVMType(decl->t, this->builder*));
+	// }
+	for (int i = 0; i < (int) n->params.size(); i++) {
+		parameters.push_back(GetLLVMType(
+			n->params[i].get(),
+			this->compilationUnit->builder*
+		));
 	}
 
 	// Create our LLVM function signature
