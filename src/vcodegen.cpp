@@ -83,7 +83,7 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	for (int i = 0; i < (int) n->params.size(); i++) {
 		parameters.push_back(GetLLVMType(
 			n->params[i].get(),
-			this->compilationUnit->builder*
+			&(this->compilationUnit->builder)
 		));
 	}
 
