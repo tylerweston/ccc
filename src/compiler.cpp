@@ -133,6 +133,7 @@ std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) {
 
 void print_ast(Node* root) {
 	// Use Visitor pattern to print our generated AST
+	PrintVisitor printVisitor;
 	root->accept(&printVisitor);
 	return;
 }
