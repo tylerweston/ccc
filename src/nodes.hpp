@@ -38,7 +38,7 @@ class ExpressionNode : public Node
 	// Expressions EVALUATE to something
 	// For now, we just care about the TYPE and if this node is CONSTANT
 public:
-	TypeName evaluatedType = TypeName::tUnknown;
+	TypeName evaluatedType;
 	bool isConstant;
 };
 
