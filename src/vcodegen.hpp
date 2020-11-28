@@ -16,9 +16,8 @@
 
 class CodegenVisitor : public NodeVisitor
 {
-private:
-	CompilationUnit* compilationUnit;
 public:
+	CompilationUnit* compilationUnit;
 	// Includes necessary to build IR
 	// will this live here and get init'ed somewhere else
 	CodegenVisitor();
