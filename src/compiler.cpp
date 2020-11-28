@@ -11,6 +11,7 @@
 #include "vprint.hpp"
 #include "voptimize.hpp"
 #include "vevaluate.hpp"
+#include "vcodegen.hpp"
 
 // Symbol & Function table
 #include "symtable.hpp"
@@ -156,8 +157,8 @@ CompilationUnit::CompilationUnit() : context(std::make_unique<llvm::LLVMContext>
 }
 
 bool CompilationUnit::process(Node* root) {
-	(void) root;
-	// TODO: lab 4
+	CodegenVisitor codegenVisitor;
+	root->accept(&codegenVisitor);
 	llvm::verifyModule(*this->module, &llvm::errs());
 	return true;
 }

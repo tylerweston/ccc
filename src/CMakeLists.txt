@@ -4,6 +4,7 @@ set(SOURCES
 	compiler.cpp
 	common.cpp
 	nodes.cpp
+	vcodegen.cpp
 	vevaluate.cpp
 	vprint.cpp
 	voptimize.cpp
