@@ -84,12 +84,12 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 		parameters.push_back(GetLLVMType(
 			n->params[i].get(),
 			this->compilationUnit->builder*
-		);
+		));
 	}
 
 	// Create our LLVM function signature
 	llvm::FunctionType* signature = llvm::FunctionType::get(
-		GetLLVMType(n->t, this->builder*) /*return type*/,
+		GetLLVMType(n->t, this->compilationUnity->builder*) /*return type*/,
 		parameters /*std::vector<Type*> paramTypes*/,
 		false
 	);

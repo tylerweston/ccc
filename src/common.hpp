@@ -8,6 +8,8 @@
 
 #include <memory>
 #include <string>
+#include "llvm/IR/Type.h"
+#include "llvm/IR/IRBuilder.h"
 
 // templated helper functions for optimization of AST
 template <class T> T _add(T a, T b) { return a + b; }
@@ -84,6 +86,8 @@ public:
 	virtual void visit(ContinueNode*) = 0;
 	virtual void visit(ExpressionStatementNode*) = 0;
 };
+
+llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder);
 
 enum class TypeName
 {
