@@ -32,7 +32,7 @@ llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 		case TypeName::tFloat:
 			return builder->getFloatTy();
 		case TypeName::tBool:
-			return builder->getInt1TY();
+			return builder->getInt1Ty();
 	}
 }
 
