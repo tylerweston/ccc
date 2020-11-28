@@ -89,7 +89,7 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 
 	// Create our LLVM function signature
 	llvm::FunctionType* signature = llvm::FunctionType::get(
-		GetLLVMType(n->t, this->compilationUnit->builder*) /*return type*/,
+		GetLLVMType(n->t, &(this->compilationUnit->builder)) /*return type*/,
 		parameters /*std::vector<Type*> paramTypes*/,
 		false
 	);
@@ -110,7 +110,7 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	while (paramNameIter != n->params.end())
 	{
 		// oooof? what are the odds this works
-		(*funcNameIter)->setName((*paramNameIter)->name);
+		funcNameIter->setName((*paramNameIter)->name);
 		funcNameIter++;
 		paramNameIter++;
 	}
