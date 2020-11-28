@@ -4,23 +4,36 @@
 #include "common.hpp"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Type.h"
+#include "llvm/IR/IRBuilder.h"
 
-llvm::Type* GetLLVMType(TypeName t, llvm::LLVMContext& context)
+// llvm::Type* GetLLVMType(TypeName t, llvm::LLVMContext& context)
+// {
+// 	switch(t) 
+// 	{
+// 		case TypeName::tVoid:
+// 			return llvm::Type::getVoidTy(context);
+// 		case TypeName::tInt:
+// 			return llvm::Type::getIntNTy(context, 32);
+// 		case TypeName::tFloat:
+// 			return llvm::Type::getFloatTy(context);
+// 		case TypeName::tBool:
+// 			return llvm::Type::getInt1TY(context);
+// 	}
+// }
+
+llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>& builder)
 {
 	switch(t) 
 	{
 		case TypeName::tVoid:
-			return llvm::Type::getVoidTy(context);
+			return builder->getVoidTy();
 		case TypeName::tInt:
-			return llvm::Type::getIntNTy(context, 32);
+			return builder->getInt32Ty();
 		case TypeName::tFloat:
-			return llvm::Type::getFloatTy(context);
+			return builder->getFloatTy();
 		case TypeName::tBool:
-			return llvm::Type::getInt1TY(context);
-		case TypeName::tUnknown:
-			return "Unknown";
+			return builder->getInt1TY();
 	}
-	return "Unknown";
 }
 
 
@@ -36,10 +49,7 @@ std::string TypeNameString(TypeName t)
 			return "float";
 		case TypeName::tBool:
 			return "bool";
-		case TypeName::tUnknown:
-			return "Unknown";
 	}
-	return "Unknown";
 }
 
 std::string BinaryOpString(BinaryOps b)

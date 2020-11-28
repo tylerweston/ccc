@@ -90,8 +90,7 @@ enum class TypeName
 	tVoid,
 	tInt,
 	tFloat,
-	tBool,
-	tUnknown	// do we need this? Expression Nodes will have this before they are evaluated?
+	tBool
 };
 std::string TypeNameString(TypeName t);
 
