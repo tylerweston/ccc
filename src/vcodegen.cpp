@@ -84,7 +84,8 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	// {	
 	// 	parameters.push_back(GetLLVMType(decl->t, this->builder*));
 	// }
-	for (int i = 0; i < (int) n->params.size(); i++) {
+	for (int i = 0; i < (int) n->params.size(); i++) 
+	{
 		parameters.push_back(GetLLVMType(
 			n->params[i]->t,
 			&(this->compilationUnit->builder)
@@ -106,17 +107,30 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 		this->compilationUnit->module.get()
 	);
 
-	// Name our function parameters
-	// generate parameter  and function name iterator
-	auto paramNameIter = n->params.begin();
-	auto funcNameIter = f->args().begin();
-	// loop over lists in parallel and name function args with their appropriate names
-	while (paramNameIter != n->params.end())
-	{
-		// oooof? what are the odds this works
-		funcNameIter->setName((*paramNameIter)->name);
-		funcNameIter++;
-		paramNameIter++;
+	// // Name our function parameters
+	// // generate parameter  and function name iterator
+	// auto paramNameIter = n->params.begin();
+	// auto funcNameIter = f->args().begin();
+	// // loop over lists in parallel and name function args with their appropriate names
+	// while (paramNameIter != n->params.end())
+	// {
+	// 	// TODO: Test if this is actually working or not!
+	// 	funcNameIter->setName((*paramNameIter)->name);
+	// 	funcNameIter++;
+	// 	paramNameIter++;
+	// }
+
+	// for (int i = 0; i < (int) n->params.size(); i++) 
+	// {
+	// 	// parameters.push_back(GetLLVMType(
+	// 	// 	n->params[i]->t,
+	// 	// 	&(this->compilationUnit->builder)
+	// 	// ));
+	// }
+	unsigned int i = 0;
+	for (llvm::Argument& a : f->args()) {
+		a.setName(n->params[i]->name);	
+		i++;
 	}
 
 

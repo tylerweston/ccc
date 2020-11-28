@@ -160,6 +160,10 @@ bool CompilationUnit::process(Node* root) {
 	codegenVisitor.compilationUnit = this;
 	root->accept(&codegenVisitor);
 	// ^^^^^
+
+	llvm::raw_ostream out();				// create raw output stream
+	this->module->print(out, nullptr);		// dump module contents
+
 	llvm::verifyModule(*this->module, &llvm::errs());
 	return true;
 }
