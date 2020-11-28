@@ -5,7 +5,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Type.h"
 
-Type* GetLLVMType(TypeName t, llvm::LLVMContext& context)
+llvm::Type* GetLLVMType(TypeName t, llvm::LLVMContext& context)
 {
 	switch(t) 
 	{
