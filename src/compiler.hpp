@@ -31,7 +31,7 @@ public:
 	std::error_code dump(std::string);
 	// int run(int, char**);
 
-private:
+// TODO: look at friend class to consider making this private
 	// using MainFunction = std::function<int(int, char**)>;
 
 	std::unique_ptr<llvm::LLVMContext> context;
