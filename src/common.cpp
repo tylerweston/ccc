@@ -21,7 +21,7 @@
 // 	}
 // }
 
-llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>& builder)
+llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 {
 	switch(t) 
 	{
