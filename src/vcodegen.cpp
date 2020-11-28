@@ -59,6 +59,10 @@ void CodegenVisitor::visit(RelationalOpNode* n)
 
 void CodegenVisitor::visit(RootNode* n) 
 {
+	for (auto& func : n->funcs)
+	{
+		func->accept(this);
+	}
 }
 
 void CodegenVisitor::visit(BlockNode* n) 
