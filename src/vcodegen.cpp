@@ -110,8 +110,8 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	// Name our function parameters
 	unsigned int i = 0;
 	for (llvm::Argument& a : f->args()) {
-		a.setName(n->params[i]->name);	
-		i++;
+		std::cout << n->params[i]->name << endl;
+		a.setName(n->params[i++]->name);
 	}
 
 
