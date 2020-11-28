@@ -34,7 +34,7 @@ llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 		case TypeName::tBool:
 			return builder->getInt1Ty();
 		default:
-			return builder->getInt1Ty();
+			return builder->getInt32Ty();
 	}
 }
 
@@ -51,6 +51,8 @@ std::string TypeNameString(TypeName t)
 			return "float";
 		case TypeName::tBool:
 			return "bool";
+		default:
+			return "int";
 	}
 }
 
