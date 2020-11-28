@@ -8,13 +8,16 @@
 #include <cstdio>
 #include "common.hpp"
 #include "nodes.hpp"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
+#include "compiler.hpp"
+// #include "llvm/IR/IRBuilder.h"
+// #include "llvm/IR/LLVMContext.h"
+// #include "llvm/IR/Module.h"
+// #include "llvm/IR/Type.h"
 
 class CodegenVisitor : public NodeVisitor
 {
+private:
+	CompilationUnit* compilationUnit;
 public:
 	// Includes necessary to build IR
 	// will this live here and get init'ed somewhere else

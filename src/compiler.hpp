@@ -27,17 +27,17 @@ public:
 
 	CompilationUnit();
 	bool process(Node*);
-	std::optional<llvm::Error> build();
+	// std::optional<llvm::Error> build();
 	std::error_code dump(std::string);
-	int run(int, char**);
+	// int run(int, char**);
 
 private:
-	using MainFunction = std::function<int(int, char**)>;
+	// using MainFunction = std::function<int(int, char**)>;
 
 	std::unique_ptr<llvm::LLVMContext> context;
 	llvm::IRBuilder<> builder;
 	std::unique_ptr<llvm::Module> module;
-	MainFunction main;
+	// MainFunction main;
 };
 
 #endif // ECE467_COMPILER_HPP_INCLUDED

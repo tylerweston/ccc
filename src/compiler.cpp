@@ -101,11 +101,13 @@ bool verify_ast(Node* root) {
 		printf("Error: No main function found\n");
 		exit(1);
 	}
-	if (mainf->ReturnType != TypeName::tInt)	// this is already checked in evaluate?
-	{
-		printf("Error: Main function needs return type int\n");
-		exit(1);
-	}
+	// int main(int x);
+	// if (mainf->ReturnType != TypeName::tInt)	// this is already checked in evaluate?
+	// {
+	// 	printf("Error: Main function needs return type int\n");
+	// 	exit(1);
+	// }
+
 	// Clean up our symbol table and function table
 	symbolTable->CleanUpSymbolTable();
 	functionTable->CleanUpFunctionTable();
@@ -131,7 +133,6 @@ std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) {
 
 void print_ast(Node* root) {
 	// Use Visitor pattern to print our generated AST
-	PrintVisitor printVisitor;
 	root->accept(&printVisitor);
 	return;
 }
@@ -141,10 +142,6 @@ std::unique_ptr<CompilationUnit> compile(Node* root) {
 	if (!unit->process(root)) {
 		return nullptr;
 	}
-	// std::optional<llvm::Error> e = unit->build();
-	// if (e) {
-	// 	return nullptr;
-	// }
 	return unit;
 }
 
@@ -157,8 +154,11 @@ CompilationUnit::CompilationUnit() : context(std::make_unique<llvm::LLVMContext>
 }
 
 bool CompilationUnit::process(Node* root) {
+	// TODO: lab 4
 	CodegenVisitor codegenVisitor;
+	codegenVisitor.compilationUnit = this;
 	root->accept(&codegenVisitor);
+	// ^^^^^
 	llvm::verifyModule(*this->module, &llvm::errs());
 	return true;
 }
@@ -166,31 +166,30 @@ bool CompilationUnit::process(Node* root) {
 std::error_code CompilationUnit::dump(std::string path) {
 	std::error_code ec;
 	llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OpenFlags::F_None);
-	// llvm::WriteBitcodeToFile(*this->module, out);
 	this->module->print(out, nullptr);
 	return ec;
 }
 
-int CompilationUnit::run(int argc, char** argv) {
-	if (this->main == nullptr) {
-		return -1;
-	}
-	return this->main(argc, argv);
-}
+// int CompilationUnit::run(int argc, char** argv) {
+// 	if (this->main == nullptr) {
+// 		return -1;
+// 	}
+// 	return this->main(argc, argv);
+// }
 
-std::optional<llvm::Error> CompilationUnit::build() {
-	llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit = llvm::orc::LLJITBuilder{}.create();
-	if (!jit) {
-		return jit.takeError();
-	}
-	llvm::Error e = (*jit)->addIRModule(llvm::orc::ThreadSafeModule { std::move(this->module), std::move(this->context) });
-	if (e) {
-		return e;
-	}
-	llvm::Expected<llvm::JITEvaluatedSymbol> entry = (*jit)->lookup("main");
-	if (!entry) {
-		return entry.takeError();
-	}
-	this->main = reinterpret_cast<int(*)(int, char**)>(entry->getAddress());
-	return std::nullopt;
-}
+// std::optional<llvm::Error> CompilationUnit::build() {
+// 	llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit = llvm::orc::LLJITBuilder{}.create();
+// 	if (!jit) {
+// 		return jit.takeError();
+// 	}
+// 	llvm::Error e = (*jit)->addIRModule(llvm::orc::ThreadSafeModule { std::move(this->module), std::move(this->context) });
+// 	if (e) {
+// 		return e;
+// 	}
+// 	llvm::Expected<llvm::JITEvaluatedSymbol> entry = (*jit)->lookup("main");
+// 	if (!entry) {
+// 		return entry.takeError();
+// 	}
+// 	this->main = reinterpret_cast<int(*)(int, char**)>(entry->getAddress());
+// 	return std::nullopt;
+// }

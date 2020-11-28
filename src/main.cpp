@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
 			printf("[error] failed to compile.\n");
 			return 1;
 		}
-		u->dump(argv[2] + ".ll"s);
+		u->dump(argv[2] + ".ll"s);	// this will be the generated code
 		return 0; 	// u->run(argc - 2, argv + 2); changes as per Lab 4 update.
 	} else {
 		printf("[error] invalid lab.\n");
