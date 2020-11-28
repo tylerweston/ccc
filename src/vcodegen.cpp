@@ -107,26 +107,7 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 		this->compilationUnit->module.get()
 	);
 
-	// // Name our function parameters
-	// // generate parameter  and function name iterator
-	// auto paramNameIter = n->params.begin();
-	// auto funcNameIter = f->args().begin();
-	// // loop over lists in parallel and name function args with their appropriate names
-	// while (paramNameIter != n->params.end())
-	// {
-	// 	// TODO: Test if this is actually working or not!
-	// 	funcNameIter->setName((*paramNameIter)->name);
-	// 	funcNameIter++;
-	// 	paramNameIter++;
-	// }
-
-	// for (int i = 0; i < (int) n->params.size(); i++) 
-	// {
-	// 	// parameters.push_back(GetLLVMType(
-	// 	// 	n->params[i]->t,
-	// 	// 	&(this->compilationUnit->builder)
-	// 	// ));
-	// }
+	// Name our function parameters
 	unsigned int i = 0;
 	for (llvm::Argument& a : f->args()) {
 		a.setName(n->params[i]->name);	
