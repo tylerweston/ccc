@@ -87,8 +87,6 @@ public:
 	virtual void visit(ExpressionStatementNode*) = 0;
 };
 
-llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder);
-
 enum class TypeName
 {
 	tVoid,
@@ -97,6 +95,7 @@ enum class TypeName
 	tBool
 };
 std::string TypeNameString(TypeName t);
+llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder);
 
 enum class BinaryOps
 {
