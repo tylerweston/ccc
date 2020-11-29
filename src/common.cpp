@@ -6,20 +6,6 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/IRBuilder.h"
 
-// llvm::Type* GetLLVMType(TypeName t, llvm::LLVMContext& context)
-// {
-// 	switch(t) 
-// 	{
-// 		case TypeName::tVoid:
-// 			return llvm::Type::getVoidTy(context);
-// 		case TypeName::tInt:
-// 			return llvm::Type::getIntNTy(context, 32);
-// 		case TypeName::tFloat:
-// 			return llvm::Type::getFloatTy(context);
-// 		case TypeName::tBool:
-// 			return llvm::Type::getInt1TY(context);
-// 	}
-// }
 
 llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 {

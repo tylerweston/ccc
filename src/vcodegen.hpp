@@ -47,7 +47,6 @@ public:
 	void visit(BreakNode* n) override;
 	void visit(ContinueNode* n) override;	
 	void visit(ExpressionStatementNode*) override;
-	void indent();
 };
 
 #endif // ECE467_CODEGEN_HPP_INCLUDED
