@@ -313,6 +313,8 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 void CodegenVisitor::visit(BoolNode* n) 
 {
 	// llvm::ConstantFP::get(llvm::Type::getInt1Ty(context), value);
+	int v = n->boolValue ? 1 : 0;
+	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));	// do we need true/false here?
 }
 
 void CodegenVisitor::visit(ReturnNode* n) 
@@ -329,6 +331,7 @@ void CodegenVisitor::visit(ReturnNode* n)
 void CodegenVisitor::visit(ConstantFloatNode* n) 
 {
 	// llvm::ConstantFP::get(llvm::Type::getDoubleTy(context), value);
+	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getDoubleTy(*(this->compilationUnit->context.get())), n->floatValue));// do we need true/false here?
 }
 
 void CodegenVisitor::visit(IfNode* n) 
