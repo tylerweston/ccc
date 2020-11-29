@@ -61,7 +61,7 @@ std::string RelationalOpsString(RelationalOps r)
 			return "<=";
 		case RelationalOps::Ge:
 			return ">=";
-		case default:
+		default:
 			return "undefined";
 	}
 }
@@ -78,7 +78,7 @@ std::string AugmentedAssignOpsString(AugmentedAssignOps a)
 			return "*=";
 		case AugmentedAssignOps::SlashEq:
 			return "/=";
-		case default:
+		default:
 			return "undefined";
 	}
 }
