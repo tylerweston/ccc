@@ -100,7 +100,12 @@ void CodegenVisitor::visit(LogicalOpNode* n)
 	// BinaryOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
-
+	n->left->accept(this);
+	llvm::Value* lval = this->consumeRetValue();
+	n->right->accept(this);
+	llvm::Value* rval = this->consumeRetValue();
+	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
+	this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
 	// 	LogAnd,
 	// 	LogOr
 }
