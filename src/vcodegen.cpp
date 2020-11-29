@@ -331,7 +331,7 @@ void CodegenVisitor::visit(ReturnNode* n)
 void CodegenVisitor::visit(ConstantFloatNode* n) 
 {
 	// llvm::ConstantFP::get(llvm::Type::getDoubleTy(context), value);
-	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getDoubleTy(*(this->compilationUnit->context.get())), n->floatValue));// do we need true/false here?
+	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getFloatTy(*(this->compilationUnit->context.get())), n->floatValue));// do we need true/false here?
 }
 
 void CodegenVisitor::visit(IfNode* n) 
@@ -400,7 +400,7 @@ void CodegenVisitor::visit(WhileNode* n)
 void CodegenVisitor::visit(UnaryNode* n) 
 {
 	// evaluate the sub expression
-	// install value of expression, but negativified
+	// create multiplication -1 and this->retValue
 }
 
 void CodegenVisitor::visit(TernaryNode* n) 
@@ -426,7 +426,7 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 void CodegenVisitor::visit(ExpressionStatementNode* n)
 {
 	// this->expr = std::move(expr); 	// he expression to be evaluated
-
+	n->expr->accept(this);
 	// evaluate the subexpression (in case of side effects)
 	// but then we can just toss the results!
 }
