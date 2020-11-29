@@ -8,9 +8,7 @@
 
 #include <memory>
 #include <string>
-#include "llvm/IR/Type.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Value.h"
+
 
 // templated helper functions for optimization of AST
 template <class T> T _add(T a, T b) { return a + b; }
@@ -97,7 +95,6 @@ enum class TypeName
 };
 std::string TypeNameString(TypeName t);
 
-
 enum class BinaryOps
 {
 	Plus,
@@ -108,7 +105,6 @@ enum class BinaryOps
 	LogOr
 };
 std::string BinaryOpString(BinaryOps b);
-
 
 enum class RelationalOps
 {
@@ -121,7 +117,13 @@ enum class RelationalOps
 };
 std::string RelationalOpsString(RelationalOps r);
 
-
 enum class AugmentedAssignOps
 {
 	PlusEq,
+	MinusEq,
+	StarEq,
+	SlashEq
+};
+
+#endif // ECE467_COMMON_HPP_INCLUDED
+
