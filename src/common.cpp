@@ -2,28 +2,6 @@
 	common.cpp
 */
 #include "common.hpp"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/IRBuilder.h"
-
-llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
-{
-	switch(t) 
-	{
-		case TypeName::tVoid:
-			return builder->getVoidTy();
-		case TypeName::tInt:
-			return builder->getInt32Ty();
-		case TypeName::tFloat:
-			return builder->getFloatTy();
-		case TypeName::tBool:
-			return builder->getInt1Ty();
-		default:
-			// TODO: llvm unreachable
-			return builder->getInt32Ty();
-	}
-}
-
 
 std::string TypeNameString(TypeName t)
 {
@@ -38,10 +16,11 @@ std::string TypeNameString(TypeName t)
 		case TypeName::tBool:
 			return "bool";
 		default:
-			// TODO: llvm unreachable
-			return "int";
+			return "undefined";
 	}
 }
+
+
 
 std::string BinaryOpString(BinaryOps b)
 {
@@ -59,9 +38,12 @@ std::string BinaryOpString(BinaryOps b)
 			return "&&";
 		case BinaryOps::LogOr:
 			return "||";
+		default:
+			return "undefined";
 	}
-	return "Unknown";
 }
+
+
 
 std::string RelationalOpsString(RelationalOps r)
 {
@@ -79,8 +61,9 @@ std::string RelationalOpsString(RelationalOps r)
 			return "<=";
 		case RelationalOps::Ge:
 			return ">=";
+		case default:
+			return "undefined";
 	}
-	return "Unknown";
 }
 
 std::string AugmentedAssignOpsString(AugmentedAssignOps a)
@@ -95,6 +78,7 @@ std::string AugmentedAssignOpsString(AugmentedAssignOps a)
 			return "*=";
 		case AugmentedAssignOps::SlashEq:
 			return "/=";
+		case default:
+			return "undefined";
 	}
-	return "Unknown";
 }

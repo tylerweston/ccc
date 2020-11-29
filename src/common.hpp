@@ -10,6 +10,7 @@
 #include <string>
 #include "llvm/IR/Type.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Value.h"
 
 // templated helper functions for optimization of AST
 template <class T> T _add(T a, T b) { return a + b; }
@@ -95,7 +96,7 @@ enum class TypeName
 	tBool
 };
 std::string TypeNameString(TypeName t);
-llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder);
+
 
 enum class BinaryOps
 {
@@ -107,7 +108,7 @@ enum class BinaryOps
 	LogOr
 };
 std::string BinaryOpString(BinaryOps b);
-llvm::Value* GetLLVMBinaryOp(BinaryOps b, llvm::IRBuilder<>* builder);
+
 
 enum class RelationalOps
 {
@@ -120,13 +121,7 @@ enum class RelationalOps
 };
 std::string RelationalOpsString(RelationalOps r);
 
+
 enum class AugmentedAssignOps
 {
 	PlusEq,
-	MinusEq,
-	StarEq,
-	SlashEq
-};
-std::string AugmentedAssignOpsString(AugmentedAssignOps a);
-
-#endif // ECE467_COMMON_HPP_INCLUDED

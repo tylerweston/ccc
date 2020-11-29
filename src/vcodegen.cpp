@@ -84,16 +84,14 @@ void CodegenVisitor::visit(BinaryOpNode* n)
 	// BinaryOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
+	// llvm::Value* operator = GetLLVMBinaryOp(n->op, &(this->compilationUnit->builder));
+	n->left->accept(this);
+	llvm::Value* lval = this->consumeRetValue();
+	n->right->accept(this);
+	llvm::Value* rval = this->consumeRetValue();
+	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
+	this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
 
-	// enum class BinaryOps
-	// {
-	// 	Plus,
-	// 	Minus,
-	// 	Star,
-	// 	Slash,
-	// 	LogAnd,
-	// 	LogOr
-	// };
 }
 
 void CodegenVisitor::visit(LogicalOpNode* n) 
@@ -203,14 +201,13 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	for (int i = 0; i < (int) n->params.size(); i++) 
 	{
 		parameters.push_back(GetLLVMType(
-			n->params[i]->t,
-			&(this->compilationUnit->builder)
+			n->params[i]->t
 		));
 	}
 
 	// Create our LLVM function signature
 	llvm::FunctionType* signature = llvm::FunctionType::get(
-		GetLLVMType(n->t, &(this->compilationUnit->builder)) /*return type*/,
+		GetLLVMType(n->t) /*return type*/,
 		parameters /*std::vector<Type*> paramTypes*/,
 		false
 	);
@@ -266,19 +263,7 @@ void CodegenVisitor::visit(FuncCallNode* n)
 
 void CodegenVisitor::visit(ConstantIntNode* n) 
 {
-	// this->retValue = this->compilationUnit->builder
-	
-	// static ConstantInt * 	get (LLVMContext &Context, const APInt &V)
- 	// Return a ConstantInt with the specified value and an implied Type. More...
-
-	// llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), value, signed);
-	
-	// Value *NumberExprAST::codegen() {
-	// return ConstantFP::get(TheContext, APFloat(Val));
-	// }
-	// llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), value, signed);
-	//this->retValue = this->compilationUnit->builder.getInt32Ty(n->intValue);
-	// this->retValue = 
+	// Set return value to be a constant integer node
 	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(this->compilationUnit->context.get())), n->intValue, true));
 }
 
@@ -313,7 +298,8 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 void CodegenVisitor::visit(BoolNode* n) 
 {
 	// llvm::ConstantFP::get(llvm::Type::getInt1Ty(context), value);
-	int v = n->boolValue ? 1 : 0;
+	// 
+	const unsigned int v = n->boolValue ? 1 : 0;
 	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));	// do we need true/false here?
 }
 
@@ -330,7 +316,7 @@ void CodegenVisitor::visit(ReturnNode* n)
 
 void CodegenVisitor::visit(ConstantFloatNode* n) 
 {
-	// llvm::ConstantFP::get(llvm::Type::getDoubleTy(context), value);
+	// Set retValue to be a constant floating point number
 	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getFloatTy(*(this->compilationUnit->context.get())), n->floatValue));// do we need true/false here?
 }
 
@@ -448,3 +434,70 @@ void CodegenVisitor::visit(ContinueNode* n)
 
 	// jump straight back to the closest above us start: statement in the same scope
 }	
+
+llvm::Value* CodegenVisitor::GetLLVMRelationalOp(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translates from relational ops used in AST gen/semantic analysis into llvm native funcs
+	switch(r) 
+	{
+		case RelationalOps::Eq:
+			return this->compilationUnit->builder.CreateICmpEQ(lhs, rhs);
+		case RelationalOps::Ne:
+			return this->compilationUnit->builder.CreateICmpNE(lhs, rhs);
+		case RelationalOps::Lt:
+			return this->compilationUnit->builder.CreateICmpSLT(lhs, rhs);
+		case RelationalOps::Gt:
+			return this->compilationUnit->builder.CreateICmpSGT(lhs, rhs);
+		case RelationalOps::Le:
+			return this->compilationUnit->builder.CreateICmpSLE(lhs, rhs);
+		case RelationalOps::Ge:
+			return this->compilationUnit->builder.CreateICmpSGE(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid relational operator");
+			return nullptr;
+	}
+}
+
+llvm::Value* CodegenVisitor::GetLLVMBinaryOp(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translate from BinaryOp enums used in AST/semantic analysis into llvms native functions
+	switch(b) 
+	{
+		case BinaryOps::Plus:
+			return this->compilationUnit->builder.CreateAdd(lhs, rhs);
+		case BinaryOps::Minus:
+			return this->compilationUnit->builder.CreateSub(lhs, rhs);
+		case BinaryOps::Star:
+			return this->compilationUnit->builder.CreateMul(lhs, rhs);
+		case BinaryOps::Slash:
+			return this->compilationUnit->builder.CreateSDiv(lhs, rhs);
+		case BinaryOps::LogAnd:
+			return this->compilationUnit->builder.CreateAnd(lhs, rhs);
+		case BinaryOps::LogOr:
+			return this->compilationUnit->builder.CreateOr(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid binary operator");
+			return nullptr;
+	}
+}
+
+
+llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
+{
+	// Translate from the TypeName enums used by the AST and semantic analysis into
+	// llvm's native types
+	switch(t) 
+	{
+		case TypeName::tVoid:
+			return this->compilationUnit->builder.getVoidTy();
+		case TypeName::tInt:
+			return this->compilationUnit->builder.getInt32Ty();
+		case TypeName::tFloat:
+			return this->compilationUnit->builder.getFloatTy();
+		case TypeName::tBool:
+			return this->compilationUnit->builder.getInt1Ty();
+		default:
+			llvm_unreachable("Invalid type");
+			return nullptr;
+	}
+}
