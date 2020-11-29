@@ -92,7 +92,7 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 
 %type <std::vector<std::unique_ptr<Node>>> function_list
 %type <std::unique_ptr<Node>> function
-%type <std::unique_ptr<Node>> function_decl
+%type <std::unique_ptr<FuncDeclNode>> function_decl
 %type <std::unique_ptr<Node>> function_defn
 
 %type <std::vector<std::unique_ptr<DeclarationNode>>> parameter_list

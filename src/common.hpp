@@ -107,6 +107,7 @@ enum class BinaryOps
 	LogOr
 };
 std::string BinaryOpString(BinaryOps b);
+llvm::Value* GetLLVMBinaryOp(BinaryOps b, llvm::IRBuilder<>* builder);
 
 enum class RelationalOps
 {

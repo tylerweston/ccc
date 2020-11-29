@@ -144,9 +144,9 @@ public:
 class FuncDefnNode : public Node
 {
 public:
-	std::unique_ptr<Node> funcDecl;
+	std::unique_ptr<FuncDeclNode> funcDecl;
 	std::unique_ptr<Node> funcBody;
-	FuncDefnNode(std::unique_ptr<Node> funcDecl, std::unique_ptr<Node> funcBody);
+	FuncDefnNode(std::unique_ptr<FuncDeclNode> funcDecl, std::unique_ptr<Node> funcBody);
 	virtual void accept(NodeVisitor* v) override;
 };
 

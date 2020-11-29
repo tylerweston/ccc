@@ -13,9 +13,13 @@
 // #include "llvm/IR/LLVMContext.h"
 // #include "llvm/IR/Module.h"
 // #include "llvm/IR/Type.h"
+#include "llvm/IR/ValueHandle.h"
+
 
 class CodegenVisitor : public NodeVisitor
 {
+private:
+	llvm::Value* retvalue;
 public:
 	CompilationUnit* compilationUnit;
 	// Includes necessary to build IR

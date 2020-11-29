@@ -17,9 +17,20 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/IR/ValueHandle.h"
 
 // Error generating
 #include "llvm/Support/Error.h"
+
+/*
+Basic block notes:
+- EVERY basic block MUST end with a terminator instruction:
+	- ret - return control flow to calling function
+		- two forms of return statement: ret <type> <value> or ret void
+	- br, switch, indirect br - transfer control to another BB in the same function
+	- invoke - transfer control to another function
+
+*/
 
 CodegenVisitor::CodegenVisitor()
 {
@@ -115,12 +126,57 @@ void CodegenVisitor::visit(RootNode* n)
 void CodegenVisitor::visit(BlockNode* n) 
 {
 	// std::vector<std::unique_ptr<Node>> stmts;
-
+	for (auto& stmt : n->stmts)
+	{
+		stmt->accept(this);
+	}
 	// A block means we have to generate a new scope!
 }
 
 void CodegenVisitor::visit(FuncDefnNode* n) 
 {
+	// What should we do if we have an external function foo and a defined function foo?
+	// We need to ensure that a function is empty before we starting filling out its body.
+	
+	// For now we'll assume the function has not been externally defined before reaching this
+	// definition
+
+	// int main()
+	// {
+	//     return;
+	// }
+
+	// Do codegen on the function declaration, then get the function object from the module
+	n->funcDecl->accept(this);
+	llvm::Function* f = this->compilationUnit->module->getFunction(n->funcDecl->name);
+
+	// // Create a new basic block to start insertion into.
+	// BasicBlock *BB = BasicBlock::Create(TheContext, "entry", TheFunction);
+	// Builder.SetInsertPoint(BB);
+	llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "entry", f);
+	this->compilationUnit->builder.SetInsertPoint(BB);
+
+	n->funcBody->accept(this);
+	this->compilationUnit->builder.CreateRet(this->retvalue);
+	// v1 = v2 op v3
+	// Builder.CreateFAdd(L, R, "addtmp");
+
+	
+	// if (Value *RetVal = Body->codegen()) {
+	// 	// Finish off the function.
+	// 	Builder.CreateRet(RetVal);
+
+	// 	// Validate the generated code, checking for consistency.
+	// 	verifyFunction(*TheFunction);
+
+	// 	return TheFunction;
+	// 	}
+
+	// // Record the function arguments in the NamedValues map.
+	// NamedValues.clear();
+	// for (auto &Arg : TheFunction->args())
+	// NamedValues[Arg.getName()] = &Arg;
+
 
 	// std::unique_ptr<Node> funcDecl;
 	// std::unique_ptr<Node> funcBody;
@@ -236,7 +292,10 @@ void CodegenVisitor::visit(BoolNode* n)
 
 void CodegenVisitor::visit(ReturnNode* n) 
 {
-	// How does this work
+	// std::unique_ptr<ExpressionNode> expr;
+	// insert ret into our basic block here but first we need to evaluate the expression to 
+	// figure out what it's value and type are.
+	this->retvalue = nullptr;
 }
 
 void CodegenVisitor::visit(ConstantFloatNode* n) 
@@ -253,6 +312,7 @@ void CodegenVisitor::visit(IfNode* n)
 
 	// condition:
 	// evaluate if condition
+	//	- builder.CreateCondBr(val, TrueBB, FalseBB)
 	// branch if false
 
 	// if code goes here...
@@ -285,6 +345,7 @@ void CodegenVisitor::visit(ForNode* n)
 	// 	body:
 	// 	// loop body
 	// 	goto header
+	//		- builder.CreateBR(label);	// unconditional branch
 
 	// 	after:
 	// // continue generating code

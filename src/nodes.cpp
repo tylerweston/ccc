@@ -53,7 +53,7 @@ FuncDeclNode::FuncDeclNode(TypeName t, std::string name, std::vector<std::unique
 }
 void FuncDeclNode::accept(NodeVisitor* v) { v->visit(this); }
 
-FuncDefnNode::FuncDefnNode(std::unique_ptr<Node> funcDecl, std::unique_ptr<Node> funcBody)
+FuncDefnNode::FuncDefnNode(std::unique_ptr<FuncDeclNode> funcDecl, std::unique_ptr<Node> funcBody)
 {
 	this->funcDecl = std::move(funcDecl);
 	this->funcBody = std::move(funcBody);

@@ -6,7 +6,6 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/IRBuilder.h"
 
-
 llvm::Type* GetLLVMType(TypeName t, llvm::IRBuilder<>* builder)
 {
 	switch(t) 
@@ -98,4 +97,3 @@ std::string AugmentedAssignOpsString(AugmentedAssignOps a)
 			return "/=";
 	}
 	return "Unknown";
-}
