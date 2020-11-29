@@ -19,12 +19,14 @@
 class CodegenVisitor : public NodeVisitor
 {
 private:
-	llvm::Value* retvalue;
+	llvm::Value* retValue;
 public:
 	CompilationUnit* compilationUnit;
 	// Includes necessary to build IR
 	// will this live here and get init'ed somewhere else
 	CodegenVisitor();
+	llvm::Value* consumeRetValue();
+	void setRetValue(llvm::Value* v);
 	void visit(VariableNode* n) override;
 	void visit(DeclarationNode* n) override;
 	void visit(DeclAndAssignNode* n) override;

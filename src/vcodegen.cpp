@@ -37,6 +37,18 @@ CodegenVisitor::CodegenVisitor()
 	// pass
 }
 
+llvm::Value* CodegenVisitor::consumeRetValue()
+{
+	llvm::Value* retval = this->retValue;
+	this->retValue = nullptr;
+	return retval;
+}
+
+void CodegenVisitor::setRetValue(llvm::Value* v)
+{
+	this->retValue = v;
+}
+
 void CodegenVisitor::visit(VariableNode* n) 
 {
 
@@ -157,7 +169,7 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	this->compilationUnit->builder.SetInsertPoint(BB);
 
 	n->funcBody->accept(this);
-	this->compilationUnit->builder.CreateRet(this->retvalue);
+	this->compilationUnit->builder.CreateRet(this->consumeRetValue());
 	// v1 = v2 op v3
 	// Builder.CreateFAdd(L, R, "addtmp");
 
@@ -254,7 +266,20 @@ void CodegenVisitor::visit(FuncCallNode* n)
 
 void CodegenVisitor::visit(ConstantIntNode* n) 
 {
+	// this->retValue = this->compilationUnit->builder
+	
+	// static ConstantInt * 	get (LLVMContext &Context, const APInt &V)
+ 	// Return a ConstantInt with the specified value and an implied Type. More...
+
 	// llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), value, signed);
+	
+	// Value *NumberExprAST::codegen() {
+	// return ConstantFP::get(TheContext, APFloat(Val));
+	// }
+	// llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), value, signed);
+	//this->retValue = this->compilationUnit->builder.getInt32Ty(n->intValue);
+	// this->retValue = 
+	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(this->compilationUnit->context.get())), n->intValue, true));
 }
 
 void CodegenVisitor::visit(AssignmentNode* n) 
@@ -295,7 +320,10 @@ void CodegenVisitor::visit(ReturnNode* n)
 	// std::unique_ptr<ExpressionNode> expr;
 	// insert ret into our basic block here but first we need to evaluate the expression to 
 	// figure out what it's value and type are.
-	this->retvalue = nullptr;
+	if (n->expr)
+		n->expr->accept(this);
+	else
+		this->setRetValue(nullptr);
 }
 
 void CodegenVisitor::visit(ConstantFloatNode* n) 

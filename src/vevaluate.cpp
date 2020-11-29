@@ -309,7 +309,7 @@ void EvaluateVisitor::visit(ReturnNode* n)
 	{
 		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Return type mistmatch in function " << curfunc->Name <<"\n";
 		std::cout << "Expected return type " << TypeNameString(curfunc->ReturnType) << " but got " << TypeNameString(rtype) << "\n";
-		// exit(1);
+		exit(1);
 	}
 }
 
