@@ -124,6 +124,7 @@ enum class AugmentedAssignOps
 	StarEq,
 	SlashEq
 };
+std::string AugmentedAssignOpsString(AugmentedAssignOps a);
 
 #endif // ECE467_COMMON_HPP_INCLUDED
 
