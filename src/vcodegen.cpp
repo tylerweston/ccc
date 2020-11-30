@@ -117,6 +117,11 @@ void CodegenVisitor::visit(RelationalOpNode* n)
 	// RelationalOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
+	n->left->accept(this);
+	llvm::Value* lval = this->consumeRetValue();
+	n->right->accept(this);
+	llvm::Value* rval = this->consumeRetValue();
+	this->setRetValue(GetLLVMRelationalOp(n->op, lval, rval));
 
 	// enum class RelationalOps
 	// {
