@@ -369,6 +369,30 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 		this->cleanTree = false;
 		this->hasReplacement = true;
 	}
+	// Support optimizing == and != for bool type	
+	if (n->right->evaluatedType == TypeName::tBool && (n->op == RelationalOps::Eq || n->op == RelationalOps::Ne))
+	{
+		float lvalue = dynamic_cast<BoolNode*>(n->left.get())->boolValue;
+		float rvalue = dynamic_cast<BoolNode*>(n->right.get())->boolValue;
+
+		std::function<bool(bool,bool)> op;
+		switch (n->op)
+		{
+			case RelationalOps::Eq:
+				op = _eq<bool>;
+				break;
+			case RelationalOps::Ne:
+				op = _ne<bool>;
+				break;
+			default:
+				op = _eq<bool>;	// default placeholder, should never happen
+				break;
+		}
+		bool result = op(lvalue, rvalue);
+		this->repl_expr_node = make_node<BoolNode>(n->location, result);
+		this->cleanTree = false;
+		this->hasReplacement = true;
+	}
 }
 
 void OptimizeVisitor::visit(RootNode* n) 
