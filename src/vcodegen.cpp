@@ -259,6 +259,7 @@ void CodegenVisitor::visit(FuncCallNode* n)
 			// TODO: This is an error, problem with evaluating expression
 		}
 	}
+	// TODO: Maybe custom names for nonvoid return functions
 	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV));
 }
 

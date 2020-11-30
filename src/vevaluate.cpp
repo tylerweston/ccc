@@ -260,6 +260,7 @@ void EvaluateVisitor::visit(FuncCallNode* n)
 	// this function call expression will evaluate to the return
 	// type of this function
 	n->evaluatedType = funcResult->ReturnType;
+	n->isConstant = false;
 }
 
 void EvaluateVisitor::visit(ConstantIntNode* n) 
