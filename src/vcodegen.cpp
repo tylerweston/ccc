@@ -259,8 +259,7 @@ void CodegenVisitor::visit(FuncCallNode* n)
 			// TODO: This is an error, problem with evaluating expression
 		}
 	}
-
-	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV, "call_" + n->name));
+	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV));
 }
 
 void CodegenVisitor::visit(ConstantIntNode* n) 
