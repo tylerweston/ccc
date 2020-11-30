@@ -412,6 +412,17 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 
 	// hmmm. how is casting supposed to work?
 	// in this language we ONLY cast integer <-> float
+
+	// by the time we get here we should KNOW that this cast is between
+	// a float and an int
+	if (n->t == TypeName::tInt)
+	{
+		// we're casting from a float to an integer
+	}
+	else
+	{
+		// we'r casting from an integer to a float
+	}
 }
 
 void CodegenVisitor::visit(ExpressionStatementNode* n)

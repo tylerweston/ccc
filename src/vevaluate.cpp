@@ -426,6 +426,12 @@ void EvaluateVisitor::visit(TernaryNode* n)
 
 void EvaluateVisitor::visit(CastExpressionNode* n) 
 {
+	if (!(n->t == TypeName::tInt || n->t == TypeName::tFloat))
+	{
+		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Can only cast between float and integer\n";
+		std::cout << "But tried to cast to type " << TypeNameString(n->t) << "\n";
+		exit(1);
+	}
 	// a cast expression evaluate to the type we are casting to
 	n->evaluatedType = n->t;
 	// we're only constant if the expression we are casting is constant

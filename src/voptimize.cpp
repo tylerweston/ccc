@@ -702,6 +702,13 @@ void OptimizeVisitor::visit(CastExpressionNode* n)
 		this->cleanTree = false;
 		this->hasReplacement = false;
 	}
+	// if we are trying to cast to the same type our operand already is, optimize out
+	if (n->t == n->expr->evaluatedType)
+	{
+		this->repl_expr_node = std::move(n->expr);
+		this->cleanTree = false;
+		this->hasReplacement = true;
+	}
 }
 
 void OptimizeVisitor::visit(BreakNode* n) 
