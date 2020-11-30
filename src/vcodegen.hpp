@@ -56,7 +56,8 @@ public:
 
 	llvm::Type* GetLLVMType(TypeName t);
 	llvm::Value* GetLLVMBinaryOp(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMRelationalOp(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
 };
 
 #endif // ECE467_CODEGEN_HPP_INCLUDED
