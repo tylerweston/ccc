@@ -94,11 +94,11 @@ void CodegenVisitor::visit(BinaryOpNode* n)
 	if (n->evaluatedType == TypeName::tFloat)
 	{
 		this->setRetValue(GetLLVMBinaryOpFP(n->op, lval, rval));
-	} else
+	} 
+	else
 	{
 		this->setRetValue(GetLLVMBinaryOpInt(n->op, lval, rval));
 	}
-
 }
 
 void CodegenVisitor::visit(LogicalOpNode* n) 
@@ -120,7 +120,6 @@ void CodegenVisitor::visit(LogicalOpNode* n)
 void CodegenVisitor::visit(RelationalOpNode* n) 
 {	
 	// binary, logical, and relational op are all basically the same thing
-//add some stuff here
 	// RelationalOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
@@ -140,15 +139,6 @@ void CodegenVisitor::visit(RelationalOpNode* n)
 		// Integer comparison
 		this->setRetValue(GetLLVMRelationalOpInt(n->op, lval, rval));
 	}
-	// enum class RelationalOps
-	// {
-	// 	Eq, 
-	// 	Ne, 
-	// 	Lt,
-	// 	Gt,
-	// 	Le, 
-	// 	Ge
-	// };
 }
 
 void CodegenVisitor::visit(RootNode* n) 
@@ -178,18 +168,11 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	// For now we'll assume the function has not been externally defined before reaching this
 	// definition
 
-	// int main()
-	// {
-	//     return;
-	// }
-
 	// Do codegen on the function declaration, then get the function object from the module
 	n->funcDecl->accept(this);
 	llvm::Function* f = this->compilationUnit->module->getFunction(n->funcDecl->name);
 
 	// // Create a new basic block to start insertion into.
-	// BasicBlock *BB = BasicBlock::Create(TheContext, "entry", TheFunction);
-	// Builder.SetInsertPoint(BB);
 	llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "entry", f);
 	this->compilationUnit->builder.SetInsertPoint(BB);
 
@@ -205,28 +188,6 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 		// body spat out
 		this->compilationUnit->builder.CreateRet(this->consumeRetValue());
 	}
-	// v1 = v2 op v3
-	// Builder.CreateFAdd(L, R, "addtmp");
-
-	
-	// if (Value *RetVal = Body->codegen()) {
-	// 	// Finish off the function.
-	// 	Builder.CreateRet(RetVal);
-
-	// 	// Validate the generated code, checking for consistency.
-	// 	verifyFunction(*TheFunction);
-
-	// 	return TheFunction;
-	// 	}
-
-	// // Record the function arguments in the NamedValues map.
-	// NamedValues.clear();
-	// for (auto &Arg : TheFunction->args())
-	// NamedValues[Arg.getName()] = &Arg;
-
-
-	// std::unique_ptr<Node> funcDecl;
-	// std::unique_ptr<Node> funcBody;
 
 	// Here, we start creating actual blocks and inserting them into the module via the builder (?!)
 }
@@ -262,32 +223,6 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 	for (llvm::Argument& a : f->args()) {
 		a.setName(n->params[i++]->name);
 	}
-
-	// LAB CODE:
-
-	// std::vector<llvm::Type*> parameters;
-	// llvm::FunctionType* signature = llvm::FunctionType::get(return_type, parameters, /* isVarArg */ false);
-	// llvm::Function* f = llvm::Function::Create(signature, llvm::Function::ExternalLinkage, name, module);
-	// size_t i = 0;
-	// for (llvm::Argument& a : f->args()) {
-	// 	a.setName(name);	
-	// }
-
-	// FuncDeclNode:
-	//   std::vector<std::unique_ptr<DeclarationNode>> params;
-	//   TypeName t;
-
-	// DeclarationNode:
-	//   std::string name;
-	//   TypeName t;
-
-	// Tutorial Code:
-
-	// 	Function *PrototypeAST::codegen() {
-	//   // Make the function type:  double(double,double) etc.
-	//   std::vector<Type*> Doubles(Args.size(), Type::getDoubleTy(TheContext));
-	//   FunctionType *FT = FunctionType::get(Type::getDoubleTy(TheContext), Doubles, false);
-	//   Function *F = Function::Create(FT, Function::ExternalLinkage, Name, TheModule.get());
 }
 
 void CodegenVisitor::visit(FuncCallNode* n) 
@@ -452,13 +387,13 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 		// float y = (float) 1 + 3
 		// we're casting from a float to an integer
 		n->expr->accept(this);
-		this->compilationUnit->builder.CreateFPToSI(this->consumeRetValue(), this->compilationUnit->builder.getInt32Ty());
+		this->setRetValue(this->compilationUnit->builder.CreateFPToSI(this->consumeRetValue(), this->compilationUnit->builder.getInt32Ty()));
 	}
 	else
 	{
 		// we'r casting from an integer to a float
 		n->expr->accept(this);
-		this->compilationUnit->builder.CreateSIToFP(this->consumeRetValue(), this->compilationUnit->builder.getFloatTy());
+		this->setRetValue(this->compilationUnit->builder.CreateSIToFP(this->consumeRetValue(), this->compilationUnit->builder.getFloatTy()));
 	}
 }
 
