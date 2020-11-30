@@ -112,7 +112,7 @@ void CodegenVisitor::visit(LogicalOpNode* n)
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
 	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
-	this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
+	this->setRetValue(GetLLVMBinaryOpInt(n->op, lval, rval));
 	// 	LogAnd,
 	// 	LogOr
 }
@@ -449,12 +449,16 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 	// a float and an int
 	if (n->t == TypeName::tInt)
 	{
+		// float y = (float) 1 + 3
 		// we're casting from a float to an integer
-		// builder.Create
+		n->expr->accept(this);
+		this->compilationUnit->builder.CreateFPToSI(this->consumeRetValue(), this->compilationUnit->builder.getInt32Ty());
 	}
 	else
 	{
 		// we'r casting from an integer to a float
+		n->expr->accept(this);
+		this->compilationUnit->builder.CreateSIToFP(this->consumeRetValue(), this->compilationUnit->builder.getFloatTy());
 	}
 }
 
