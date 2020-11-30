@@ -172,7 +172,17 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	this->compilationUnit->builder.SetInsertPoint(BB);
 
 	n->funcBody->accept(this);
-	this->compilationUnit->builder.CreateRet(this->consumeRetValue());
+	if (n->funcDecl->t == TypeName::tVoid)
+	{
+		// If the type of this function is void, don't return anything
+		this->compilationUnit->builder.CreateRet(nullptr);
+	}
+	else
+	{
+		// otherwise, whatever we return is based whatever evaluating the function
+		// body spat out
+		this->compilationUnit->builder.CreateRet(this->consumeRetValue());
+	}
 	// v1 = v2 op v3
 	// Builder.CreateFAdd(L, R, "addtmp");
 
