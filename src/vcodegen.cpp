@@ -473,7 +473,8 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOp(BinaryOps b, llvm::Value* lhs, llvm
 		case BinaryOps::Minus:
 			return this->compilationUnit->builder.CreateSub(lhs, rhs);
 		case BinaryOps::Star:
-			return this->compilationUnit->builder.CreateMul(lhs, rhs);
+			return this->compilationUnit->builder.CreateFMul(lhs, rhs);
+			// return this->compilationUnit->builder.CreateMul(lhs, rhs);
 		case BinaryOps::Slash:
 			return this->compilationUnit->builder.CreateSDiv(lhs, rhs);
 		case BinaryOps::LogAnd:
