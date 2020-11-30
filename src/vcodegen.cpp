@@ -51,11 +51,20 @@ void CodegenVisitor::setRetValue(llvm::Value* v)
 
 void CodegenVisitor::visit(VariableNode* n) 
 {
+	// Value *VariableExprAST::codegen() {
+	// // Look this variable up in the function.
+	// Value *V = NamedValues[Name];
+	// if (!V)
+	// 	LogErrorV("Unknown variable name");
+	// return V;
+	// }
 
-	// std::string name;
-
-	//this->compilationUnit->builder
-	//this->compilationUnit->
+	llvm::Value* val = this->symbolTable[n->name];
+	if (!val)
+	{
+		// TODO: error checking unknown variable name
+	}
+	this->setRetValue(val);
 }
 
 void CodegenVisitor::visit(DeclarationNode* n) 
@@ -176,6 +185,13 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "entry", f);
 	this->compilationUnit->builder.SetInsertPoint(BB);
 
+	// Add parameters to our symbol table
+	this->symbolTable.clear();
+	for (auto &Arg : f->args())
+	{
+		this->symbolTable[Arg.getName()] = &Arg;
+	}
+
 	n->funcBody->accept(this);
 	if (n->funcDecl->t == TypeName::tVoid)
 	{
@@ -227,22 +243,6 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 
 void CodegenVisitor::visit(FuncCallNode* n) 
 {
-
-	// Value *CallExprAST::codegen() {
-	// // Look up the name in the global module table.
-	// Function *CalleeF = TheModule->getFunction(Callee);
-	// if (!CalleeF)
-	// 	return LogErrorV("Unknown function referenced");
-
-	// std::vector<Value *> ArgsV;
-	// for (unsigned i = 0, e = Args.size(); i != e; ++i) {
-	// 	ArgsV.push_back(Args[i]->codegen());
-	// 	if (!ArgsV.back())
-	// 	return nullptr;
-	// }
-
-	// return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
-	// }
 	llvm::Function* CalleeF = this->compilationUnit->module->getFunction(n->name);
 	if (!CalleeF)
 	{
@@ -261,11 +261,6 @@ void CodegenVisitor::visit(FuncCallNode* n)
 	}
 
 	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV, "call_" + n->name));
-
-	// std::string name;
-	// std::vector<std::unique_ptr<ExpressionNode>> funcArgs;
-
-	// check out how to call functions here, we need to visit the insertion point set in the function table?
 }
 
 void CodegenVisitor::visit(ConstantIntNode* n) 
@@ -419,18 +414,12 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 	// a float and an int
 	if (n->t == TypeName::tInt)
 	{
-		// float y = (float) 1 + 3
 		// we're casting from a float to an integer
 		n->expr->accept(this);
 		this->setRetValue(this->compilationUnit->builder.CreateFPToSI(this->consumeRetValue(), this->compilationUnit->builder.getInt32Ty()));
 	}
 	else
 	{
-		// L = Builder.CreateFCmpULT(L, R, "cmptmp");
-		// // Convert bool 0/1 to double 0.0 or 1.0
-		// return Builder.CreateUIToFP(L, Type::getDoubleTy(TheContext),
-		// 							"booltmp");
-		
 		// we'r casting from an integer to a float
 		n->expr->accept(this);
 		this->setRetValue(this->compilationUnit->builder.CreateSIToFP(this->consumeRetValue(), this->compilationUnit->builder.getFloatTy()));
@@ -439,10 +428,10 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 
 void CodegenVisitor::visit(ExpressionStatementNode* n)
 {
-	// this->expr = std::move(expr); 	// he expression to be evaluated
-	n->expr->accept(this);
 	// evaluate the subexpression (in case of side effects)
-	// but then we can just toss the results!
+	// but then we can just toss the results!	
+	n->expr->accept(this);
+	this->setRetValue(nullptr);
 }
 
 void CodegenVisitor::visit(BreakNode* n) 
