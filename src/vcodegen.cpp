@@ -90,7 +90,14 @@ void CodegenVisitor::visit(BinaryOpNode* n)
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
 	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
-	this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
+	// this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
+	if (n->evaluatedType == TypeName::tFloat)
+	{
+		this->setRetValue(GetLLVMBinaryOpFP(n->op, lval, rval));
+	} else
+	{
+		this->setRetValue(GetLLVMBinaryOpInt(n->op, lval, rval));
+	}
 
 }
 
@@ -113,7 +120,7 @@ void CodegenVisitor::visit(LogicalOpNode* n)
 void CodegenVisitor::visit(RelationalOpNode* n) 
 {	
 	// binary, logical, and relational op are all basically the same thing
-
+//add some stuff here
 	// RelationalOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
@@ -443,6 +450,7 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 	if (n->t == TypeName::tInt)
 	{
 		// we're casting from a float to an integer
+		// builder.Create
 	}
 	else
 	{
@@ -522,7 +530,7 @@ llvm::Value* CodegenVisitor::GetLLVMRelationalOpFP(RelationalOps r, llvm::Value*
 	}
 }
 
-llvm::Value* CodegenVisitor::GetLLVMBinaryOp(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs)
+llvm::Value* CodegenVisitor::GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs)
 {
 	// translate from BinaryOp enums used in AST/semantic analysis into llvms native functions
 	switch(b) 
@@ -532,14 +540,34 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOp(BinaryOps b, llvm::Value* lhs, llvm
 		case BinaryOps::Minus:
 			return this->compilationUnit->builder.CreateSub(lhs, rhs);
 		case BinaryOps::Star:
-			return this->compilationUnit->builder.CreateFMul(lhs, rhs);
-			// return this->compilationUnit->builder.CreateMul(lhs, rhs);
+			// return this->compilationUnit->builder.CreateFMul(lhs, rhs);
+			return this->compilationUnit->builder.CreateMul(lhs, rhs);
 		case BinaryOps::Slash:
 			return this->compilationUnit->builder.CreateSDiv(lhs, rhs);
 		case BinaryOps::LogAnd:
 			return this->compilationUnit->builder.CreateAnd(lhs, rhs);
 		case BinaryOps::LogOr:
 			return this->compilationUnit->builder.CreateOr(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid binary operator");
+			return nullptr;
+	}
+}
+
+llvm::Value* CodegenVisitor::GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translate from BinaryOp enums used in AST/semantic analysis into llvms native functions
+	switch(b) 
+	{
+		case BinaryOps::Plus:
+			return this->compilationUnit->builder.CreateFAdd(lhs, rhs);
+		case BinaryOps::Minus:
+			return this->compilationUnit->builder.CreateFSub(lhs, rhs);
+		case BinaryOps::Star:
+			return this->compilationUnit->builder.CreateFMul(lhs, rhs);
+			// return this->compilationUnit->builder.CreateMul(lhs, rhs);
+		case BinaryOps::Slash:
+			return this->compilationUnit->builder.CreateFDiv(lhs, rhs);
 		default:
 			llvm_unreachable("Invalid binary operator");
 			return nullptr;
