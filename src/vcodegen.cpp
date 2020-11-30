@@ -117,7 +117,22 @@ void CodegenVisitor::visit(RelationalOpNode* n)
 	// RelationalOps op;
 	// std::unique_ptr<ExpressionNode> left;
 	// std::unique_ptr<ExpressionNode> right;
-
+	n->left->accept(this);
+	llvm::Value* lval = this->consumeRetValue();
+	n->right->accept(this);
+	llvm::Value* rval = this->consumeRetValue();
+	// We only have to check the left nodes evaluated type since, due to semantic checking, left and right
+	// are guaranteed to have matching types by the time we get here
+	if (n->left->evaluatedType == TypeName::tFloat)
+	{
+		// Floating point comparison
+		this->setRetValue(GetLLVMRelationalOpFP(n->op, lval, rval));
+	}
+	else
+	{
+		// Integer comparison
+		this->setRetValue(GetLLVMRelationalOpInt(n->op, lval, rval));
+	}
 	// enum class RelationalOps
 	// {
 	// 	Eq, 
@@ -440,7 +455,7 @@ void CodegenVisitor::visit(ContinueNode* n)
 	// jump straight back to the closest above us start: statement in the same scope
 }	
 
-llvm::Value* CodegenVisitor::GetLLVMRelationalOp(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
+llvm::Value* CodegenVisitor::GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
 {
 	// translates from relational ops used in AST gen/semantic analysis into llvm native funcs
 	switch(r) 
@@ -457,6 +472,29 @@ llvm::Value* CodegenVisitor::GetLLVMRelationalOp(RelationalOps r, llvm::Value* l
 			return this->compilationUnit->builder.CreateICmpSLE(lhs, rhs);
 		case RelationalOps::Ge:
 			return this->compilationUnit->builder.CreateICmpSGE(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid relational operator");
+			return nullptr;
+	}
+}
+
+llvm::Value* CodegenVisitor::GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translates from relational ops used in AST gen/semantic analysis into llvm native funcs
+	switch(r) 
+	{
+		case RelationalOps::Eq:
+			return this->compilationUnit->builder.CreateFCmpOEQ(lhs, rhs);
+		case RelationalOps::Ne:
+			return this->compilationUnit->builder.CreateFCmpONE(lhs, rhs);
+		case RelationalOps::Lt:
+			return this->compilationUnit->builder.CreateFCmpOLT(lhs, rhs);
+		case RelationalOps::Gt:
+			return this->compilationUnit->builder.CreateFCmpOGT(lhs, rhs);
+		case RelationalOps::Le:
+			return this->compilationUnit->builder.CreateFCmpOLE(lhs, rhs);
+		case RelationalOps::Ge:
+			return this->compilationUnit->builder.CreateFCmpOGE(lhs, rhs);
 		default:
 			llvm_unreachable("Invalid relational operator");
 			return nullptr;
