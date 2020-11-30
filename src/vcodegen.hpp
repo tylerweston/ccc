@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <cstdio>
+#include <map>
 #include "common.hpp"
 #include "nodes.hpp"
 #include "compiler.hpp"
@@ -20,6 +21,8 @@ class CodegenVisitor : public NodeVisitor
 {
 private:
 	llvm::Value* retValue;
+	std::map<std::string, llvm::Value*> symbolTable;
+
 public:
 	CompilationUnit* compilationUnit;
 	// Includes necessary to build IR
