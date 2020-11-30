@@ -259,7 +259,7 @@ void CodegenVisitor::visit(FuncCallNode* n)
 			// TODO: This is an error, problem with evaluating expression
 		}
 	}
-	// TODO: Maybe custom names for nonvoid return functions
+	// TODO: Maybe custom names for non-void return functions
 	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV));
 }
 
@@ -271,7 +271,6 @@ void CodegenVisitor::visit(ConstantIntNode* n)
 
 void CodegenVisitor::visit(AssignmentNode* n) 
 {
-
 	// std::string name;						// can be name or declaration
 	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
 
@@ -300,7 +299,6 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 void CodegenVisitor::visit(BoolNode* n) 
 {
 	// llvm::ConstantFP::get(llvm::Type::getInt1Ty(context), value);
-	// 
 	const unsigned int v = n->boolValue ? 1 : 0;
 	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));	// do we need true/false here?
 }
@@ -337,7 +335,6 @@ void CodegenVisitor::visit(IfNode* n)
 	// if code goes here...
 
 	// false branch jumps here...
-
 }
 
 void CodegenVisitor::visit(ForNode* n) 
@@ -372,7 +369,6 @@ void CodegenVisitor::visit(ForNode* n)
 
 void CodegenVisitor::visit(WhileNode* n) 
 {
-
 	// this->whileExpr = std::move(whileExpr);
 	// this->loopBody = std::move(loopBody);
 
@@ -388,18 +384,22 @@ void CodegenVisitor::visit(WhileNode* n)
 void CodegenVisitor::visit(UnaryNode* n) 
 {
 	// evaluate the sub expression
+	// assume the type of the child is float or int since -bool or -void doesn't really make
+	// any sense!
 	// create multiplication -1 and this->retValue
 }
 
 void CodegenVisitor::visit(TernaryNode* n) 
 {
-
 	// this->condExpr = std::move(condExpr);
 	// this->trueExpr = std::move(trueExpr);
 	// this->falseExpr = std::move(falseExpr);
 
 	// this is the same setup as an if statement but then we make sure the expression
 	// evaluates to whichever branch tests true.
+
+	// we evaluate our condExpr, then based on retvalue, 
+	// either set to be the true or false branch
 }
 
 void CodegenVisitor::visit(CastExpressionNode* n) 
@@ -439,9 +439,10 @@ void CodegenVisitor::visit(BreakNode* n)
 	// this node does not hold any information right now, does it have to? Or is this something we can 
 	// grab through llvm somehow?
 
-	// break out of top level loop expression
-	// this seems a little wonky, how do we manage this one? jump back to the closest
-	// end: statement in the same scope?
+	// break out a loop by jumping to the after label
+	// To handle break and continue, you must keep track of the "header" and "after" block for each loop.
+	// so in codegen we have a "header" and "after" labels that we update appropriately whenever we create
+	// a new loop construct?
 }
 
 void CodegenVisitor::visit(ContinueNode* n) 
@@ -449,7 +450,10 @@ void CodegenVisitor::visit(ContinueNode* n)
 	// this node currently does not hold any info, is this something we can grab through llvm or should
 	// we be storing it in the AST somehow?!
 
-	// jump straight back to the closest above us start: statement in the same scope
+	// jump straight back to the current header label
+	// To handle break and continue, you must keep track of the "header" and "after" block for each loop.
+	// so in codegen we have a "header" and "after" labels that we update appropriately whenever we create
+	// a new loop construct?
 }	
 
 llvm::Value* CodegenVisitor::GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
