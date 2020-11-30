@@ -227,6 +227,41 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 
 void CodegenVisitor::visit(FuncCallNode* n) 
 {
+
+	// Value *CallExprAST::codegen() {
+	// // Look up the name in the global module table.
+	// Function *CalleeF = TheModule->getFunction(Callee);
+	// if (!CalleeF)
+	// 	return LogErrorV("Unknown function referenced");
+
+	// std::vector<Value *> ArgsV;
+	// for (unsigned i = 0, e = Args.size(); i != e; ++i) {
+	// 	ArgsV.push_back(Args[i]->codegen());
+	// 	if (!ArgsV.back())
+	// 	return nullptr;
+	// }
+
+	// return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
+	// }
+	llvm::Function* CalleeF = this->compilationUnit->module->getFunction(n->name);
+	if (!CalleeF)
+	{
+		// TODO: This is an error! We can't find the function we've referenced
+	}
+
+	std::vector<llvm::Value *> ArgsV;
+	for (unsigned i = 0, e = n->funcArgs.size(); i != e; ++i)
+	{
+		n->funcArgs[i]->accept(this);
+		ArgsV.push_back(this->consumeRetValue());
+		if (!ArgsV.back())
+		{
+			// TODO: This is an error, problem with evaluating expression
+		}
+	}
+
+	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV, "call_" + n->name));
+
 	// std::string name;
 	// std::vector<std::unique_ptr<ExpressionNode>> funcArgs;
 
@@ -391,6 +426,11 @@ void CodegenVisitor::visit(CastExpressionNode* n)
 	}
 	else
 	{
+		// L = Builder.CreateFCmpULT(L, R, "cmptmp");
+		// // Convert bool 0/1 to double 0.0 or 1.0
+		// return Builder.CreateUIToFP(L, Type::getDoubleTy(TheContext),
+		// 							"booltmp");
+		
 		// we'r casting from an integer to a float
 		n->expr->accept(this);
 		this->setRetValue(this->compilationUnit->builder.CreateSIToFP(this->consumeRetValue(), this->compilationUnit->builder.getFloatTy()));
