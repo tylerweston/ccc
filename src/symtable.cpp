@@ -34,6 +34,25 @@ bool SymbolTable::AddSymbol(std::string name, TypeName type, YYLTYPE loc)
 	return true;
 }
 
+bool SymbolTable::AddLLVMSymbol(std::string name, llvm::AllocaInst* val)
+{
+	// add this symbol to the currently in scope symbol table
+	// return true if it succeeded or false if this symbol already 
+	// exists in this scope. This is for use in the llvm IR generation
+	// phase so the only thing we need is the llvm::Value*
+	if (CurrentSymbolTable->find(name) != CurrentSymbolTable->end())
+	{
+		return false;	// already declared in this scope
+	}
+	// make our new symbol table entry
+	SymbolTableEntry* symbolTableEntry = new SymbolTableEntry();
+	symbolTableEntry->Name = name;
+	symbolTableEntry->val = val;
+	// add it to the current active symbol table
+	CurrentSymbolTable->insert(std::pair<std::string, SymbolTableEntry*>(name, symbolTableEntry));
+	return true;
+}
+
 void SymbolTable::PushScope()
 {								
 	// enter a new scope
@@ -78,6 +97,14 @@ SymbolTableEntry* SymbolTable::GetSymbol(std::string Symbol)
 		}
 		return found->second;
 	}
+	return nullptr;
+}
+
+llvm::AllocaInst* SymbolTable::GetLLVMValue(std::string Symbol)
+{
+	SymbolTableEntry* s = this->GetSymbol(Symbol);
+	if (s)
+		return s->val;
 	return nullptr;
 }
 

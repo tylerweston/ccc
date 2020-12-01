@@ -12,6 +12,8 @@
 #include <list>		// used as stack, maybe change to vector?
 #include "common.hpp"
 #include "bridge.hpp"
+#include "llvm/IR/ValueHandle.h"
+#include "llvm/IR/Instructions.h"
 
 typedef struct 
 {
@@ -19,6 +21,7 @@ typedef struct
 	TypeName Type;					// type of symbol
 	YYLTYPE declarationLocation;	// location where symbol was defined
 	// Additional attributes would go here, CONST, etc.
+	llvm::AllocaInst* val;				// use this to hold llvm specific info, usually a pointer to a memory location
 } SymbolTableEntry;
 
 typedef struct 
@@ -45,7 +48,9 @@ private:
 public:
 	SymbolTable();
 	SymbolTableEntry* GetSymbol(std::string Symbol);
+	llvm::AllocaInst* GetLLVMValue(std::string Symbol);
 	bool AddSymbol(std::string Name, TypeName Type, YYLTYPE loc);
+	bool AddLLVMSymbol(std::string Name, llvm::AllocaInst* val);
 
 	void PushScope();
 	void PopScope();
