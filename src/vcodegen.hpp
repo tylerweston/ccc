@@ -22,8 +22,18 @@ class CodegenVisitor : public NodeVisitor
 {
 private:
 	llvm::Value* retValue;
-	std::map<std::string, llvm::Value*> symbolTable;
 	SymbolTable* symTable;
+
+	llvm::Value* consumeRetValue();
+
+	llvm::Type* GetLLVMType(TypeName t);
+	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+
+	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
+
 
 public:
 	CompilationUnit* compilationUnit;
@@ -31,7 +41,6 @@ public:
 	// will this live here and get init'ed somewhere else
 	CodegenVisitor();
 	~CodegenVisitor();
-	llvm::Value* consumeRetValue();
 	void setRetValue(llvm::Value* v);
 	void visit(VariableNode* n) override;
 	void visit(DeclarationNode* n) override;
@@ -60,13 +69,6 @@ public:
 	void visit(ContinueNode* n) override;	
 	void visit(ExpressionStatementNode*) override;
 
-	llvm::Type* GetLLVMType(TypeName t);
-	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
-
-	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
 };
 
 #endif // ECE467_CODEGEN_HPP_INCLUDED

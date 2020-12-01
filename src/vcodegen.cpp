@@ -410,7 +410,10 @@ void CodegenVisitor::visit(IfNode* n)
 
 void CodegenVisitor::visit(ForNode* n) 
 {
-	// TODO: Should we PushScope() here and PopScope() at the end
+	// TODO: Should we PushScope() here and PopScope() at the end?
+	// I don't think so since we create a new scope in the body of the for loop anyways
+	// Yes! Since we want to be able to shadow vars in the outer scope here
+	this->symTable->PushScope();
 	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();
 
 	if (n->initStmt)
@@ -466,6 +469,7 @@ void CodegenVisitor::visit(ForNode* n)
 
 	// we continue inserting code after the for loop
 	this->compilationUnit->builder.SetInsertPoint(outloopbb);
+	this->symTable->PopScope();
 	// 	outloop:
 	// // continue generating code
 }
