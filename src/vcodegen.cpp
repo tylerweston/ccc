@@ -176,7 +176,11 @@ void CodegenVisitor::visit(BlockNode* n)
 	for (auto& stmt : n->stmts)
 	{
 		stmt->accept(this);
+		// TODO: IF we get a return at the top level before the function is finished, we
+		// need to not generate the rest of the function!
 	}
+	// when we leave a block, we need a return function
+	// at a higher level
 	this->symTable->PopScope();
 }
 
@@ -215,16 +219,22 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	//  - We should probably be actually inserting the ret operation when
 	//    we encounter a return node. If we just insert it, it should(?)
 	//    be in the correct place in the correct basic block?
-	if (n->funcDecl->t == TypeName::tVoid)
+	// if (n->funcDecl->t == TypeName::tVoid)
+	// {
+	// 	// If the type of this function is void, don't return anything
+	// 	this->compilationUnit->builder.CreateRet(nullptr);
+	// }
+	// else
+	// {
+	// 	// otherwise, whatever we return is based whatever evaluating the function
+	// 	// body spat out
+	// 	this->compilationUnit->builder.CreateRet(this->consumeRetValue());
+	// }
+	if (this->compilationUnit->builder.GetInsertBlock()->getTerminator() == nullptr)
 	{
-		// If the type of this function is void, don't return anything
+		// If we don't have a return at the end of a block, it is is because we are in a void
+		// function and it doesn't have a final return value
 		this->compilationUnit->builder.CreateRet(nullptr);
-	}
-	else
-	{
-		// otherwise, whatever we return is based whatever evaluating the function
-		// body spat out
-		this->compilationUnit->builder.CreateRet(this->consumeRetValue());
 	}
 	// Pop the scope for this function, discarding the values
 	this->symTable->PopScope();	// TODO: Do we need to clean up a scope before we pop it?
@@ -293,11 +303,8 @@ void CodegenVisitor::visit(ConstantIntNode* n)
 
 void CodegenVisitor::visit(AssignmentNode* n) 
 {
-	// std::string name;						// can be name or declaration
-	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
-
 	// get a pointer to a symbol from the namedvalues and assign a value to it
-	llvm::Value* lloc = this->symTable->GetLLVMValue(n->name);	// todo: This is an AllocaInst*
+	llvm::AllocaInst* lloc = this->symTable->GetLLVMValue(n->name);
 	if (!lloc)
 	{
 		// TODO: error checking here
@@ -310,6 +317,10 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 {
 
 	// First, we'll grab the variable
+	// figure out the operation associated with the AugmentedAssignOps
+	// apply this operation to the variable
+	// then store it back where it used to be
+
 	// AugmentedAssignOps op;
 	// std::string name;
 	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
@@ -340,9 +351,15 @@ void CodegenVisitor::visit(ReturnNode* n)
 	// figure out what it's value and type are. If there is no expression, it is a void return
 	// so we just return a nullptr
 	if (n->expr)
+	{
 		n->expr->accept(this);
+		this->compilationUnit->builder.CreateRet(this->consumeRetValue());
+	}
 	else
-		this->setRetValue(nullptr);
+	{
+		this->compilationUnit->builder.CreateRet(nullptr);
+	}
+		//this->setRetValue(nullptr);
 }
 
 void CodegenVisitor::visit(ConstantFloatNode* n) 
@@ -366,6 +383,45 @@ void CodegenVisitor::visit(IfNode* n)
 	// if code goes here...
 
 	// false branch jumps here...
+
+	// OK first we evaluate the if condition
+	n->ifExpr->accept(this);
+	llvm::Value* condV = this->consumeRetValue();
+	if (!condV)
+	{
+		// TODO: Error out here!
+	}
+	// now, we turn this condition into an bool (int1) by neq'ing it with 0
+	condV = this->compilationUnit->builder.CreateICmpNE(
+		condV, 
+		llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), 0), 
+		"ifcond"
+	);
+
+	// Figure out which block we're currently in and where to insert the if statements
+	llvm::Function *theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();
+
+	// Since we don't support else, we only have two blocks, IF TRUE and IF CONTINUTE (ie, false)
+	llvm::BasicBlock *iftrueBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "iftrue", theFunction);
+	llvm::BasicBlock *ifcontBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "ifcont");
+
+	// conditionally jump to iftrue or ifcont 
+	this->compilationUnit->builder.CreateCondBr(condV, iftrueBB, ifcontBB);
+
+	// generate code for if body
+	this->compilationUnit->builder.SetInsertPoint(iftrueBB);
+	n->ifBody->accept(this);
+	if (this->compilationUnit->builder.GetInsertBlock()->getTerminator() == nullptr)
+	{
+		// If we returned in this branch, we don't want to BR out of it
+		this->compilationUnit->builder.CreateBr(ifcontBB);
+	}
+
+	// push if continue block and make that our new insert point to continue code generation
+	theFunction->getBasicBlockList().push_back(ifcontBB);
+	this->compilationUnit->builder.SetInsertPoint(ifcontBB);
+	// TODO: Do we have to deal with any Phi stuff here? Or is that all sorted
+	// out by the llvm? Seems to be working fine?
 }
 
 void CodegenVisitor::visit(ForNode* n) 
