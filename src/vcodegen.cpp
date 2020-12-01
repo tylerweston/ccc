@@ -1,6 +1,7 @@
 #include "vcodegen.hpp"
 #include "nodes.hpp"
 #include "common.hpp"
+#include "symtable.hpp"
 #include <memory>
 #include <iostream>
 #include <string>
@@ -35,6 +36,13 @@ Basic block notes:
 CodegenVisitor::CodegenVisitor()
 {
 	// pass
+	symTable = new SymbolTable();
+}
+
+CodegenVisitor::~CodegenVisitor()
+{
+	symTable->CleanUpSymbolTable();
+	delete(symTable);
 }
 
 llvm::Value* CodegenVisitor::consumeRetValue()
@@ -59,12 +67,13 @@ void CodegenVisitor::visit(VariableNode* n)
 	// return V;
 	// }
 
-	llvm::Value* val = this->symbolTable[n->name];
+	llvm::AllocaInst* val = this->symTable->GetLLVMValue(n->name); //this->symbolTable[n->name];
 	if (!val)
 	{
 		// TODO: error checking unknown variable name
 	}
-	this->setRetValue(val);
+	llvm::Value* r = this->compilationUnit->builder.CreateLoad(val, n->name);
+	this->setRetValue(r);
 }
 
 void CodegenVisitor::visit(DeclarationNode* n) 
@@ -75,31 +84,35 @@ void CodegenVisitor::visit(DeclarationNode* n)
 
 	// install a symbol
 	// llvm::Type::getIntNTy(context, num_bits)	// Create integer type
+	llvm::AllocaInst* Alloca = this->compilationUnit->builder.CreateAlloca(
+			this->GetLLVMType(n->t), 0, n->name
+		);
+	this->symTable->AddLLVMSymbol(n->name, Alloca);
+	// this->retValue = Alloca;
 }
 
 void CodegenVisitor::visit(DeclAndAssignNode* n) 
 {
-	// std::unique_ptr<DeclarationNode> decl;	// declaration
-	// std::unique_ptr<ExpressionNode> expr;	// expression to be assigned to the variable
-
 	// install a symbol and set it's value
-	// we should just use the mechanisms implemented in declaration and assign here
+	llvm::AllocaInst* Alloca = this->compilationUnit->builder.CreateAlloca(
+			this->GetLLVMType(n->decl->t), 0, n->decl->name
+		);
+	this->symTable->AddLLVMSymbol(n->decl->name, Alloca);
+	n->expr->accept(this);
+	this->compilationUnit->builder.CreateStore(this->consumeRetValue(), Alloca);
 }
 
 void CodegenVisitor::visit(BinaryOpNode* n) 
 {
-	// binary, logical, and relational op are all basically the same thing
+	// Generate code to evaluate binary operations
 
-	// BinaryOps op;
-	// std::unique_ptr<ExpressionNode> left;
-	// std::unique_ptr<ExpressionNode> right;
-	// llvm::Value* operator = GetLLVMBinaryOp(n->op, &(this->compilationUnit->builder));
+	// Evaluate our two operands
 	n->left->accept(this);
 	llvm::Value* lval = this->consumeRetValue();
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
-	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
-	// this->setRetValue(GetLLVMBinaryOp(n->op, lval, rval));
+
+	// Either perform floating point or int math depending on the type of this node
 	if (n->evaluatedType == TypeName::tFloat)
 	{
 		this->setRetValue(GetLLVMBinaryOpFP(n->op, lval, rval));
@@ -112,30 +125,27 @@ void CodegenVisitor::visit(BinaryOpNode* n)
 
 void CodegenVisitor::visit(LogicalOpNode* n) 
 {
-	// binary, logical, and relational op are all basically the same thing
-	// BinaryOps op;
-	// std::unique_ptr<ExpressionNode> left;
-	// std::unique_ptr<ExpressionNode> right;
+	// Generate code to evaluate logical operations
+
+	// Evaluate our two operands
 	n->left->accept(this);
 	llvm::Value* lval = this->consumeRetValue();
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
-	// this->retValue = GetLLVMBinaryOp(n->op, lval, rval);
+	// Perform our logical operation
 	this->setRetValue(GetLLVMBinaryOpInt(n->op, lval, rval));
-	// 	LogAnd,
-	// 	LogOr
 }
 
 void CodegenVisitor::visit(RelationalOpNode* n) 
 {	
-	// binary, logical, and relational op are all basically the same thing
-	// RelationalOps op;
-	// std::unique_ptr<ExpressionNode> left;
-	// std::unique_ptr<ExpressionNode> right;
+	// Generate code to handle relational operations
+
+	// Evaluate our two operands
 	n->left->accept(this);
 	llvm::Value* lval = this->consumeRetValue();
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
+
 	// We only have to check the left nodes evaluated type since, due to semantic checking, left and right
 	// are guaranteed to have matching types by the time we get here
 	if (n->left->evaluatedType == TypeName::tFloat)
@@ -161,12 +171,13 @@ void CodegenVisitor::visit(RootNode* n)
 
 void CodegenVisitor::visit(BlockNode* n) 
 {
-	// std::vector<std::unique_ptr<Node>> stmts;
+	// A block means we have to generate a new scope!
+	this->symTable->PushScope();
 	for (auto& stmt : n->stmts)
 	{
 		stmt->accept(this);
 	}
-	// A block means we have to generate a new scope!
+	this->symTable->PopScope();
 }
 
 void CodegenVisitor::visit(FuncDefnNode* n) 
@@ -181,18 +192,29 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	n->funcDecl->accept(this);
 	llvm::Function* f = this->compilationUnit->module->getFunction(n->funcDecl->name);
 
-	// // Create a new basic block to start insertion into.
+	// Create a new basic block to start insertion into.
 	llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "entry", f);
 	this->compilationUnit->builder.SetInsertPoint(BB);
 
-	// Add parameters to our symbol table
-	this->symbolTable.clear();
+	// Add parameters to our symbol table and reserve room on our stack for them. Note that each function
+	// is also it's own scope, so we push scope here and pop scope when this function is finished.
+	this->symTable->PushScope();
 	for (auto &Arg : f->args())
 	{
-		this->symbolTable[Arg.getName()] = &Arg;
+		llvm::AllocaInst *Alloca = this->CreateEntryBlockAlloca(f, Arg.getName(), Arg.getType());
+		this->compilationUnit->builder.CreateStore(&Arg, Alloca);
+		this->symTable->AddLLVMSymbol(Arg.getName(), Alloca);
 	}
 
+	// Evaluate the body of this function
 	n->funcBody->accept(this);
+
+	// Now, this might not always be correct? 
+	//  - What about returns in the middle of a function?
+	//  - What about returns in the middle of control blocks?
+	//  - We should probably be actually inserting the ret operation when
+	//    we encounter a return node. If we just insert it, it should(?)
+	//    be in the correct place in the correct basic block?
 	if (n->funcDecl->t == TypeName::tVoid)
 	{
 		// If the type of this function is void, don't return anything
@@ -204,8 +226,8 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 		// body spat out
 		this->compilationUnit->builder.CreateRet(this->consumeRetValue());
 	}
-
-	// Here, we start creating actual blocks and inserting them into the module via the builder (?!)
+	// Pop the scope for this function, discarding the values
+	this->symTable->PopScope();	// TODO: Do we need to clean up a scope before we pop it?
 }
 
 void CodegenVisitor::visit(FuncDeclNode* n) 
@@ -275,10 +297,19 @@ void CodegenVisitor::visit(AssignmentNode* n)
 	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
 
 	// get a pointer to a symbol from the namedvalues and assign a value to it
+	llvm::Value* lloc = this->symTable->GetLLVMValue(n->name);	// todo: This is an AllocaInst*
+	if (!lloc)
+	{
+		// TODO: error checking here
+	}
+	n->expr->accept(this);
+	this->compilationUnit->builder.CreateStore(this->consumeRetValue(), lloc);
 }
 
 void CodegenVisitor::visit(AugmentedAssignmentNode* n) 
 {
+
+	// First, we'll grab the variable
 	// AugmentedAssignOps op;
 	// std::string name;
 	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
@@ -298,16 +329,16 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 
 void CodegenVisitor::visit(BoolNode* n) 
 {
-	// llvm::ConstantFP::get(llvm::Type::getInt1Ty(context), value);
+	// Generate a constant boolean value, represented as a 1 bit integer in llvm
 	const unsigned int v = n->boolValue ? 1 : 0;
-	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));	// do we need true/false here?
+	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));
 }
 
 void CodegenVisitor::visit(ReturnNode* n) 
 {
-	// std::unique_ptr<ExpressionNode> expr;
 	// insert ret into our basic block here but first we need to evaluate the expression to 
-	// figure out what it's value and type are.
+	// figure out what it's value and type are. If there is no expression, it is a void return
+	// so we just return a nullptr
 	if (n->expr)
 		n->expr->accept(this);
 	else
@@ -404,12 +435,6 @@ void CodegenVisitor::visit(TernaryNode* n)
 
 void CodegenVisitor::visit(CastExpressionNode* n) 
 {
-	// this->t = t;
-	// this->expr = std::move(expr);
-
-	// hmmm. how is casting supposed to work?
-	// in this language we ONLY cast integer <-> float
-
 	// by the time we get here we should KNOW that this cast is between
 	// a float and an int
 	if (n->t == TypeName::tInt)
@@ -565,4 +590,11 @@ llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
 			llvm_unreachable("Invalid type");
 			return nullptr;
 	}
+}
+
+llvm::AllocaInst* CodegenVisitor::CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t)
+{
+	llvm::IRBuilder<> TmpB(&TheFunction->getEntryBlock(),
+		TheFunction->getEntryBlock().begin());
+	return TmpB.CreateAlloca(t, 0, VarName);
 }

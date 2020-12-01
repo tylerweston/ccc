@@ -10,6 +10,7 @@
 #include "common.hpp"
 #include "nodes.hpp"
 #include "compiler.hpp"
+#include "symtable.hpp"
 // #include "llvm/IR/IRBuilder.h"
 // #include "llvm/IR/LLVMContext.h"
 // #include "llvm/IR/Module.h"
@@ -22,12 +23,14 @@ class CodegenVisitor : public NodeVisitor
 private:
 	llvm::Value* retValue;
 	std::map<std::string, llvm::Value*> symbolTable;
+	SymbolTable* symTable;
 
 public:
 	CompilationUnit* compilationUnit;
 	// Includes necessary to build IR
 	// will this live here and get init'ed somewhere else
 	CodegenVisitor();
+	~CodegenVisitor();
 	llvm::Value* consumeRetValue();
 	void setRetValue(llvm::Value* v);
 	void visit(VariableNode* n) override;
@@ -62,6 +65,8 @@ public:
 	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
 	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
 	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+
+	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
 };
 
 #endif // ECE467_CODEGEN_HPP_INCLUDED
