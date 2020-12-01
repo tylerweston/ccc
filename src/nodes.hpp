@@ -225,8 +225,8 @@ class ForNode : public StatementNode
 {
 public:
 	std::unique_ptr<Node> initStmt;
-	std::unique_ptr<ExpressionNode> midExpr;
-	std::unique_ptr<Node> loopCondStmt;
+	std::unique_ptr<ExpressionNode> loopCondExpr;
+	std::unique_ptr<Node> updateStmt;
 	std::unique_ptr<Node> loopBody; 
 	ForNode(std::unique_ptr<Node> initStmt, std::unique_ptr<ExpressionNode> midExpr, std::unique_ptr<Node> loopCondStmt, std::unique_ptr<Node> loopBody);
 	virtual void accept(NodeVisitor* v) override;

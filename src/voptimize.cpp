@@ -587,13 +587,13 @@ void OptimizeVisitor::visit(IfNode* n)
 void OptimizeVisitor::visit(ForNode* n) 
 {
 	// may have a midExpr that needs to be optimized
-	if (n->midExpr)
+	if (n->loopCondExpr)
 	{
-		n->midExpr->accept(this);
+		n->loopCondExpr->accept(this);
 		if (this->hasReplacement)
 		{
 			// have to dynamic cast this to expression node?
-			n->midExpr = std::move(this->repl_expr_node);
+			n->loopCondExpr = std::move(this->repl_expr_node);
 			this->cleanTree = false;
 			this->hasReplacement = false;
 		}

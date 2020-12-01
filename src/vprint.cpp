@@ -269,10 +269,10 @@ void PrintVisitor::visit(ForNode* n)
 	std::cout << "}\n";
 
 	this->indent();
-	std::cout << "LoopExpr {\n";
+	std::cout << "LoopConditionExpr {\n";
 	this->indent_level++;
-	if (n->midExpr)
-		n->midExpr->accept(this);
+	if (n->loopCondExpr)
+		n->loopCondExpr->accept(this);
 	else
 	{
 		this->indent();
@@ -283,10 +283,10 @@ void PrintVisitor::visit(ForNode* n)
 	std::cout << "}\n";
 
 	this->indent();
-	std::cout << "ConditionExpr {\n";
+	std::cout << "UpdateStmt {\n";
 	this->indent_level++;
-	if (n->loopCondStmt)
-		n->loopCondStmt->accept(this);
+	if (n->updateStmt)
+		n->updateStmt->accept(this);
 	else
 	{
 		this->indent();

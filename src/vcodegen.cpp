@@ -370,21 +370,7 @@ void CodegenVisitor::visit(ConstantFloatNode* n)
 
 void CodegenVisitor::visit(IfNode* n) 
 {
-	// this->ifExpr = std::move(ifExpr);
-	// this->ifBody = std::move(ifBody);
-
-	// basic block, compare and jump on comparison success or fail?
-
-	// condition:
-	// evaluate if condition
-	//	- builder.CreateCondBr(val, TrueBB, FalseBB)
-	// branch if false
-
-	// if code goes here...
-
-	// false branch jumps here...
-
-	// OK first we evaluate the if condition
+	// first we evaluate the if condition
 	n->ifExpr->accept(this);
 	llvm::Value* condV = this->consumeRetValue();
 	if (!condV)
@@ -420,37 +406,67 @@ void CodegenVisitor::visit(IfNode* n)
 	// push if continue block and make that our new insert point to continue code generation
 	theFunction->getBasicBlockList().push_back(ifcontBB);
 	this->compilationUnit->builder.SetInsertPoint(ifcontBB);
-	// TODO: Do we have to deal with any Phi stuff here? Or is that all sorted
-	// out by the llvm? Seems to be working fine?
 }
 
 void CodegenVisitor::visit(ForNode* n) 
 {
+	// TODO: Should we PushScope() here and PopScope() at the end
+	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();
 
-	// this->initStmt = std::move(initStmt);
-	// this->midExpr = std::move(midExpr);
-	// this->loopCondStmt = std::move(loopCondStmt);
-	// this->loopBody = std::move(loopBody);
+	if (n->initStmt)
+	{
+		n->initStmt->accept(this);
+	}
 
-	// this is described in the lab handout
-	// 	before:
-	// 	// whatever happens before the loop
-	// 	goto loop_condition
+	// loopend basic block will handle updating the variable and checking for end condition
+	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopend", theFunction);
+	this->compilationUnit->builder.CreateBr(loopendbb);
 
-	// 	header:
-	// 	// loop induction statement
-	// 	goto loop_condition
+	// the loop body is reponsible for executing the actual body of the loop, then jump
+	// to loopend to increment vars and check again
+	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loop", theFunction);
+	this->compilationUnit->builder.SetInsertPoint(loopbb);
+	n->loopBody->accept(this);
+	this->compilationUnit->builder.CreateBr(loopendbb);	
 
-	// 	loop_condition:
-	// 	// evaluate loop condition
-	// 	branch body after
+	// create exit block
+	llvm::BasicBlock* outloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "outloop", theFunction);
 
-	// 	body:
-	// 	// loop body
-	// 	goto header
-	//		- builder.CreateBR(label);	// unconditional branch
+	// execute mid expression (var increments or something)
+	this->compilationUnit->builder.SetInsertPoint(loopendbb);
+	if (n->updateStmt)
+	{
+		n->updateStmt->accept(this);
+	}
+	// if we have a condition, evaluate it
+	if (n->loopCondExpr)
+	{
+		// evaluate loop condition
+		n->loopCondExpr->accept(this);
+		llvm::Value* endcondV = this->consumeRetValue();
+		if (!endcondV)
+		{
+			// TODO: Error out here!
+		}
+		endcondV = this->compilationUnit->builder.CreateICmpNE(
+			endcondV, 
+			llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), 0), 
+			"ifcond"
+		);
 
-	// 	after:
+		this->compilationUnit->builder.CreateCondBr(endcondV, loopbb, outloopbb);
+	}
+	else
+	{
+		// otherwise, we are just like for(...;...;)
+		// so we just loop anyways!
+		this->compilationUnit->builder.CreateBr(loopbb);
+	}
+
+
+	// we continue inserting code after the for loop
+	this->compilationUnit->builder.SetInsertPoint(outloopbb);
+	// 	outloop:
 	// // continue generating code
 }
 

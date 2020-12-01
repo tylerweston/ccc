@@ -349,20 +349,20 @@ void EvaluateVisitor::visit(ForNode* n)
 		n->initStmt->accept(this);
 	}
 	// If we have a predicate, evaluate predicate to make sure it evaluates to bool
-	if (n->midExpr)
+	if (n->loopCondExpr)
 	{
-		n->midExpr->accept(this);
-		if (n->midExpr->evaluatedType != TypeName::tBool)
+		n->loopCondExpr->accept(this);
+		if (n->loopCondExpr->evaluatedType != TypeName::tBool)
 		{
 			std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Condition of for statement must be a boolean\n";
-			std::cout << "but it evaluated to " << TypeNameString(n->midExpr->evaluatedType) << "\n";
+			std::cout << "but it evaluated to " << TypeNameString(n->loopCondExpr->evaluatedType) << "\n";
 			exit(1);
 		}
 	}
 	// If we have a conditional, check it out
-	if (n->loopCondStmt)
+	if (n->updateStmt)
 	{
-		n->loopCondStmt->accept(this);
+		n->updateStmt->accept(this);
 	}
 	// check rest of for loop
 	n->loopBody->accept(this);
