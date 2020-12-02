@@ -23,30 +23,23 @@
 // Error generating
 #include "llvm/Support/Error.h"
 
-/*
-Basic block notes:
-- EVERY basic block MUST end with a terminator instruction:
-	- ret - return control flow to calling function
-		- two forms of return statement: ret <type> <value> or ret void
-	- br, switch, indirect br - transfer control to another BB in the same function
-	- invoke - transfer control to another function
-
-*/
-
 CodegenVisitor::CodegenVisitor()
 {
-	// pass
+	// Create a new symbol table
 	symTable = new SymbolTable();
 }
 
 CodegenVisitor::~CodegenVisitor()
 {
+	// Clean up symbol table
 	symTable->CleanUpSymbolTable();
 	delete(symTable);
 }
 
 llvm::Value* CodegenVisitor::consumeRetValue()
 {
+	// This is the equivalent of returning a value from a function
+	// consuming it is to use that return value
 	llvm::Value* retval = this->retValue;
 	this->retValue = nullptr;
 	return retval;
@@ -54,24 +47,19 @@ llvm::Value* CodegenVisitor::consumeRetValue()
 
 void CodegenVisitor::setRetValue(llvm::Value* v)
 {
+	// set the return value to be consumed later
 	this->retValue = v;
 }
 
 void CodegenVisitor::visit(VariableNode* n) 
 {
-	// Value *VariableExprAST::codegen() {
-	// // Look this variable up in the function.
-	// Value *V = NamedValues[Name];
-	// if (!V)
-	// 	LogErrorV("Unknown variable name");
-	// return V;
-	// }
-
-	llvm::AllocaInst* val = this->symTable->GetLLVMValue(n->name); //this->symbolTable[n->name];
+	// Lookup a variable in the symbol table and grab it's location
+	llvm::AllocaInst* val = this->symTable->GetLLVMValue(n->name);
 	if (!val)
 	{
 		// TODO: error checking unknown variable name
 	}
+	// Load the value expected from that location and return int
 	llvm::Value* r = this->compilationUnit->builder.CreateLoad(val, n->name);
 	this->setRetValue(r);
 }
@@ -79,21 +67,17 @@ void CodegenVisitor::visit(VariableNode* n)
 void CodegenVisitor::visit(DeclarationNode* n) 
 {
 
-	// std::string name;
-	// TypeName t;
-
-	// install a symbol
-	// llvm::Type::getIntNTy(context, num_bits)	// Create integer type
+	// Allocate space for a variable of the specified name and type
+	// and add it to the symbol table
 	llvm::AllocaInst* Alloca = this->compilationUnit->builder.CreateAlloca(
 			this->GetLLVMType(n->t), 0, n->name
 		);
 	this->symTable->AddLLVMSymbol(n->name, Alloca);
-	// this->retValue = Alloca;
 }
 
 void CodegenVisitor::visit(DeclAndAssignNode* n) 
 {
-	// install a symbol and set it's value
+	// Allocate space for a variable and set it's value
 	llvm::AllocaInst* Alloca = this->compilationUnit->builder.CreateAlloca(
 			this->GetLLVMType(n->decl->t), 0, n->decl->name
 		);
@@ -132,6 +116,7 @@ void CodegenVisitor::visit(LogicalOpNode* n)
 	llvm::Value* lval = this->consumeRetValue();
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
+
 	// Perform our logical operation
 	this->setRetValue(GetLLVMBinaryOpInt(n->op, lval, rval));
 }
@@ -177,10 +162,8 @@ void CodegenVisitor::visit(BlockNode* n)
 	{
 		stmt->accept(this);
 		// TODO: IF we get a return at the top level before the function is finished, we
-		// need to not generate the rest of the function!
+		// need to not generate the rest of the function!?
 	}
-	// when we leave a block, we need a return function
-	// at a higher level
 	this->symTable->PopScope();
 }
 
@@ -259,6 +242,7 @@ void CodegenVisitor::visit(FuncDeclNode* n)
 
 void CodegenVisitor::visit(FuncCallNode* n) 
 {
+	// Call a function
 	llvm::Function* CalleeF = this->compilationUnit->module->getFunction(n->name);
 	if (!CalleeF)
 	{
@@ -543,9 +527,6 @@ void CodegenVisitor::visit(TernaryNode* n)
 	// get the parent function
 	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	
 
-	// this->condExpr = std::move(condExpr);
-	// this->trueExpr = std::move(trueExpr);
-	// this->falseExpr = std::move(falseExpr);
 	// first we'll evaluate the if condition
 	n->condExpr->accept(this);
 	llvm::Value* condV = this->consumeRetValue();
