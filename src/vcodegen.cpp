@@ -521,19 +521,77 @@ void CodegenVisitor::visit(UnaryNode* n)
 	// assume the type of the child is float or int since -bool or -void doesn't really make
 	// any sense!
 	// create multiplication -1 and this->retValue
+	n->expr->accept(this);
+	llvm::Value* val = this->consumeRetValue();
+
+	// We only have to check the left nodes evaluated type since, due to semantic checking, left and right
+	// are guaranteed to have matching types by the time we get here
+	if (n->expr->evaluatedType == TypeName::tFloat)
+	{
+		// Floating point comparison
+		this->setRetValue(this->compilationUnit->builder.CreateFMul(val, llvm::ConstantFP::get(llvm::Type::getFloatTy(*(this->compilationUnit->context.get())), -1.0f)));
+	}
+	else
+	{
+		// Integer comparison
+		this->setRetValue(this->compilationUnit->builder.CreateMul(val, llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), -1)));
+	}
 }
 
 void CodegenVisitor::visit(TernaryNode* n) 
 {
+	// get the parent function
+	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	
+
 	// this->condExpr = std::move(condExpr);
 	// this->trueExpr = std::move(trueExpr);
 	// this->falseExpr = std::move(falseExpr);
+	// first we'll evaluate the if condition
+	n->condExpr->accept(this);
+	llvm::Value* condV = this->consumeRetValue();
+	if (!condV)
+	{
+		// TODO: Error out here!
+	}
+	// now, we turn this condition into an bool (int1) by neq'ing it with 0
+	condV = this->compilationUnit->builder.CreateICmpNE(
+		condV, 
+		llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), 0), 
+		"ifcond"
+	);
 
-	// this is the same setup as an if statement but then we make sure the expression
-	// evaluates to whichever branch tests true.
+	// setup basic blocks needed for ternary operation
+	llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "trueval", theFunction);
+	llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "falseval");
+	llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "mergeval");
 
-	// we evaluate our condExpr, then based on retvalue, 
-	// either set to be the true or false branch
+	// jump based on condition
+	this->compilationUnit->builder.CreateCondBr(condV, trueBB, falseBB);
+
+	// true basic block
+	this->compilationUnit->builder.SetInsertPoint(trueBB);
+	n->trueExpr->accept(this);
+	llvm::Value* trueV = this->consumeRetValue();
+	this->compilationUnit->builder.CreateBr(mergeBB);
+	trueBB = this->compilationUnit->builder.GetInsertBlock();
+
+	// false basic block
+	theFunction->getBasicBlockList().push_back(falseBB);
+	this->compilationUnit->builder.SetInsertPoint(falseBB);
+	n->falseExpr->accept(this);
+	llvm::Value* falseV = this->consumeRetValue();
+	this->compilationUnit->builder.CreateBr(mergeBB);
+	//trueBB = this->compilationUnit->builder.GetInsertBlock();
+
+	// use phi to choose between two above values
+	theFunction->getBasicBlockList().push_back(mergeBB);
+	this->compilationUnit->builder.SetInsertPoint(mergeBB);
+	llvm::Type* t = this->GetLLVMType(n->evaluatedType);
+	llvm::PHINode* PN = this->compilationUnit->builder.CreatePHI(t, 2, "ternary");
+	PN->addIncoming(trueV, trueBB);
+	PN->addIncoming(falseV, falseBB);
+
+	this->setRetValue(PN);
 }
 
 void CodegenVisitor::visit(CastExpressionNode* n) 
@@ -577,6 +635,7 @@ void CodegenVisitor::visit(ContinueNode* n)
 }	
 
 // Helper functions for our types -> llvm types
+// TODO: Move these out of here!
 
 llvm::Value* CodegenVisitor::GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
 {
@@ -666,7 +725,6 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, ll
 	}
 }
 
-
 llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
 {
 	// Translate from the TypeName enums used by the AST and semantic analysis into
@@ -724,8 +782,6 @@ llvm::Value* CodegenVisitor::GetLLVMAugmentedAssignOpsFP(AugmentedAssignOps a, l
 			return nullptr;
 	}
 }
-
-
 
 llvm::AllocaInst* CodegenVisitor::CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t)
 {
