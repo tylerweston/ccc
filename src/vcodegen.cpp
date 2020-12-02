@@ -422,18 +422,22 @@ void CodegenVisitor::visit(ForNode* n)
 	}
 
 	// loopend basic block will handle updating the variable and checking for end condition
-	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopend", theFunction);
+	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forend", theFunction);
+	// This is where a continue would go to, so set our header for continue here
+	this->loopHeader = loopendbb;
 	this->compilationUnit->builder.CreateBr(loopendbb);
 
 	// the loop body is reponsible for executing the actual body of the loop, then jump
 	// to loopend to increment vars and check again
-	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loop", theFunction);
+	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
 	this->compilationUnit->builder.SetInsertPoint(loopbb);
 	n->loopBody->accept(this);
 	this->compilationUnit->builder.CreateBr(loopendbb);	
 
 	// create exit block
-	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "exitloop", theFunction);
+	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
+	// this is where a break would go to, so mark out exit
+	this->loopExit = exitloopbb;
 
 	// execute mid expression (var increments or something)
 	this->compilationUnit->builder.SetInsertPoint(loopendbb);
@@ -477,12 +481,18 @@ void CodegenVisitor::visit(ForNode* n)
 
 void CodegenVisitor::visit(WhileNode* n) 
 {
-	// this->whileExpr = std::move(whileExpr);
-	// this->loopBody = std::move(loopBody);
+
 	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	// get the parent function
-	llvm::BasicBlock* headerbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopheader", theFunction);
-	llvm::BasicBlock* loopbodybb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopbody", theFunction);
-	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "exitloop", theFunction);
+
+	// Setup blocks needed for while loop
+	llvm::BasicBlock* headerbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileheader", theFunction);
+	// continue would loop back to check condition again, so set properly
+	this->loopHeader = headerbb;
+
+	llvm::BasicBlock* loopbodybb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whilebody", theFunction);
+	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileexit", theFunction);
+	// break would go to the loop end, so set properly
+	this->loopExit = exitloopbb;
 
 	// jump to our header function so we can test our condition
 	this->compilationUnit->builder.CreateBr(headerbb);
@@ -512,13 +522,6 @@ void CodegenVisitor::visit(WhileNode* n)
 
 	// set our insertion point to be after the loop exit
 	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
-	// while loop head:
-	// evaluate loop condition:
-	// if false jump to end while loop
-	// while code...
-	// jump to while loop head:
-	// end while loop:
-	// ...
 }
 
 void CodegenVisitor::visit(UnaryNode* n) 
@@ -570,24 +573,16 @@ void CodegenVisitor::visit(ExpressionStatementNode* n)
 
 void CodegenVisitor::visit(BreakNode* n) 
 {
-	// this node does not hold any information right now, does it have to? Or is this something we can 
-	// grab through llvm somehow?
-
 	// break out a loop by jumping to the after label
-	// To handle break and continue, you must keep track of the "header" and "after" block for each loop.
-	// so in codegen we have a "header" and "after" labels that we update appropriately whenever we create
-	// a new loop construct?
+	// TODO: What about nested breaks/continues? We need a STACK of headers/exits?
+	this->compilationUnit->builder.CreateBr(this->loopExit);
 }
 
 void CodegenVisitor::visit(ContinueNode* n) 
 {
-	// this node currently does not hold any info, is this something we can grab through llvm or should
-	// we be storing it in the AST somehow?!
-
 	// jump straight back to the current header label
-	// To handle break and continue, you must keep track of the "header" and "after" block for each loop.
-	// so in codegen we have a "header" and "after" labels that we update appropriately whenever we create
-	// a new loop construct?
+	// TODO: what about nested breaks/continues? We need a STACK of headers/exits?
+	this->compilationUnit->builder.CreateBr(this->loopHeader);
 }	
 
 llvm::Value* CodegenVisitor::GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)

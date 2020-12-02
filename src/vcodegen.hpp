@@ -11,10 +11,12 @@
 #include "nodes.hpp"
 #include "compiler.hpp"
 #include "symtable.hpp"
+
 // #include "llvm/IR/IRBuilder.h"
 // #include "llvm/IR/LLVMContext.h"
 // #include "llvm/IR/Module.h"
 // #include "llvm/IR/Type.h"
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/ValueHandle.h"
 
 
@@ -22,9 +24,12 @@ class CodegenVisitor : public NodeVisitor
 {
 private:
 	llvm::Value* retValue;
+
 	SymbolTable* symTable;
 
 	llvm::Value* consumeRetValue();
+	llvm::BasicBlock* loopHeader;
+	llvm::BasicBlock* loopExit;
 
 	llvm::Type* GetLLVMType(TypeName t);
 	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
