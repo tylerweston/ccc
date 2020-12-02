@@ -213,23 +213,7 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	// Evaluate the body of this function
 	n->funcBody->accept(this);
 
-	// Now, this might not always be correct? 
-	//  - What about returns in the middle of a function?
-	//  - What about returns in the middle of control blocks?
-	//  - We should probably be actually inserting the ret operation when
-	//    we encounter a return node. If we just insert it, it should(?)
-	//    be in the correct place in the correct basic block?
-	// if (n->funcDecl->t == TypeName::tVoid)
-	// {
-	// 	// If the type of this function is void, don't return anything
-	// 	this->compilationUnit->builder.CreateRet(nullptr);
-	// }
-	// else
-	// {
-	// 	// otherwise, whatever we return is based whatever evaluating the function
-	// 	// body spat out
-	// 	this->compilationUnit->builder.CreateRet(this->consumeRetValue());
-	// }
+	// make sure we have our returns setup properly
 	if (this->compilationUnit->builder.GetInsertBlock()->getTerminator() == nullptr)
 	{
 		// If we don't have a return at the end of a block, it is is because we are in a void
@@ -237,7 +221,7 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 		this->compilationUnit->builder.CreateRet(nullptr);
 	}
 	// Pop the scope for this function, discarding the values
-	this->symTable->PopScope();	// TODO: Do we need to clean up a scope before we pop it?
+	this->symTable->PopScope();
 }
 
 void CodegenVisitor::visit(FuncDeclNode* n) 
@@ -317,25 +301,30 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 {
 
 	// First, we'll grab the variable
-	// figure out the operation associated with the AugmentedAssignOps
+	llvm::AllocaInst* lloc = this->symTable->GetLLVMValue(n->name);
+	if (!lloc)
+	{
+		// TODO: error checking here
+	}
+	llvm::Value* lval = this->compilationUnit->builder.CreateLoad(lloc, n->name);
+
+
+	// then evalute the rhs
+	n->expr->accept(this);
+	llvm::Value* rval = this->consumeRetValue();
 	// apply this operation to the variable
+	// Either perform floating point or int math depending on the type of this node
+	if (n->expr->evaluatedType == TypeName::tInt)
+	{
+		this->setRetValue(GetLLVMAugmentedAssignOpsInt(n->op, lval, rval));
+	} 
+	else
+	{
+		this->setRetValue(GetLLVMAugmentedAssignOpsFP(n->op, lval, rval));
+	}
+
 	// then store it back where it used to be
-
-	// AugmentedAssignOps op;
-	// std::string name;
-	// std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
-	// {
-	// 	case AugmentedAssignOps::PlusEq:
-	// 		return "+=";
-	// 	case AugmentedAssignOps::MinusEq:
-	// 		return "-=";
-	// 	case AugmentedAssignOps::StarEq:
-	// 		return "*=";
-	// 	case AugmentedAssignOps::SlashEq:
-	// 		return "/=";
-	// }
-
-	// can use the same mechanism as Assignment, since x += 1 ie is just syntactic sugar for x = x + 1
+	this->compilationUnit->builder.CreateStore(this->consumeRetValue(), lloc);
 }
 
 void CodegenVisitor::visit(BoolNode* n) 
@@ -359,7 +348,6 @@ void CodegenVisitor::visit(ReturnNode* n)
 	{
 		this->compilationUnit->builder.CreateRet(nullptr);
 	}
-		//this->setRetValue(nullptr);
 }
 
 void CodegenVisitor::visit(ConstantFloatNode* n) 
@@ -475,21 +463,23 @@ void CodegenVisitor::visit(ForNode* n)
 	// we continue inserting code after the for loop
 	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
 	this->symTable->PopScope();
-	// 	outloop:
-	// // continue generating code
+	// continue generating code
 }
 
 void CodegenVisitor::visit(WhileNode* n) 
 {
-
-	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	// get the parent function
+	// get the parent function
+	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	
 
 	// Setup blocks needed for while loop
 	llvm::BasicBlock* headerbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileheader", theFunction);
 	// continue would loop back to check condition again, so set properly
 	this->loopHeader = headerbb;
 
+	// basic block for loop body
 	llvm::BasicBlock* loopbodybb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whilebody", theFunction);
+	
+	// block for end of loop
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileexit", theFunction);
 	// break would go to the loop end, so set properly
 	this->loopExit = exitloopbb;
@@ -518,6 +508,7 @@ void CodegenVisitor::visit(WhileNode* n)
 	// loop body is simply the body of the while statement
 	this->compilationUnit->builder.SetInsertPoint(loopbodybb);
 	n->loopBody->accept(this);
+	// when we're done evaluating the body, jump back to the header 
 	this->compilationUnit->builder.CreateBr(headerbb);	
 
 	// set our insertion point to be after the loop exit
@@ -585,6 +576,8 @@ void CodegenVisitor::visit(ContinueNode* n)
 	this->compilationUnit->builder.CreateBr(this->loopHeader);
 }	
 
+// Helper functions for our types -> llvm types
+
 llvm::Value* CodegenVisitor::GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs)
 {
 	// translates from relational ops used in AST gen/semantic analysis into llvm native funcs
@@ -641,7 +634,6 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, l
 		case BinaryOps::Minus:
 			return this->compilationUnit->builder.CreateSub(lhs, rhs);
 		case BinaryOps::Star:
-			// return this->compilationUnit->builder.CreateFMul(lhs, rhs);
 			return this->compilationUnit->builder.CreateMul(lhs, rhs);
 		case BinaryOps::Slash:
 			return this->compilationUnit->builder.CreateSDiv(lhs, rhs);
@@ -666,7 +658,6 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, ll
 			return this->compilationUnit->builder.CreateFSub(lhs, rhs);
 		case BinaryOps::Star:
 			return this->compilationUnit->builder.CreateFMul(lhs, rhs);
-			// return this->compilationUnit->builder.CreateMul(lhs, rhs);
 		case BinaryOps::Slash:
 			return this->compilationUnit->builder.CreateFDiv(lhs, rhs);
 		default:
@@ -696,8 +687,49 @@ llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
 	}
 }
 
+llvm::Value* CodegenVisitor::GetLLVMAugmentedAssignOpsInt(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translate from BinaryOp enums used in AST/semantic analysis into llvms native functions
+	switch(a)
+	{
+		case AugmentedAssignOps::PlusEq:
+			return this->compilationUnit->builder.CreateAdd(lhs, rhs);
+		case AugmentedAssignOps::MinusEq:
+			return this->compilationUnit->builder.CreateSub(lhs, rhs);
+		case AugmentedAssignOps::StarEq:
+			return this->compilationUnit->builder.CreateMul(lhs, rhs);
+		case AugmentedAssignOps::SlashEq:
+			return this->compilationUnit->builder.CreateSDiv(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid binary operator");
+			return nullptr;
+	}
+}
+
+llvm::Value* CodegenVisitor::GetLLVMAugmentedAssignOpsFP(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs)
+{
+	// translate from BinaryOp enums used in AST/semantic analysis into llvms native functions
+	switch(a) 
+	{
+		case AugmentedAssignOps::PlusEq:
+			return this->compilationUnit->builder.CreateFAdd(lhs, rhs);
+		case AugmentedAssignOps::MinusEq:
+			return this->compilationUnit->builder.CreateFSub(lhs, rhs);
+		case AugmentedAssignOps::StarEq:
+			return this->compilationUnit->builder.CreateFMul(lhs, rhs);
+		case AugmentedAssignOps::SlashEq:
+			return this->compilationUnit->builder.CreateFDiv(lhs, rhs);
+		default:
+			llvm_unreachable("Invalid binary operator");
+			return nullptr;
+	}
+}
+
+
+
 llvm::AllocaInst* CodegenVisitor::CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t)
 {
+	// Alloca space for a variable in the entry block of our current function
 	llvm::IRBuilder<> TmpB(&TheFunction->getEntryBlock(),
 		TheFunction->getEntryBlock().begin());
 	return TmpB.CreateAlloca(t, 0, VarName);

@@ -36,6 +36,8 @@ private:
 	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
 	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
 	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMAugmentedAssignOpsInt(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMAugmentedAssignOpsFP(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs);
 
 	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
 
