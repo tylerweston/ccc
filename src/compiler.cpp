@@ -101,7 +101,6 @@ bool verify_ast(Node* root) {
 		printf("Error: No main function found\n");
 		exit(1);
 	}
-	// int main(int x);
 	if (mainf->ReturnType != TypeName::tInt)	// this is already checked in evaluate?
 	{
 		printf("Error: Main function needs return type int\n");
