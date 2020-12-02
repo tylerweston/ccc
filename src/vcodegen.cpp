@@ -433,7 +433,7 @@ void CodegenVisitor::visit(ForNode* n)
 	this->compilationUnit->builder.CreateBr(loopendbb);	
 
 	// create exit block
-	llvm::BasicBlock* outloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "outloop", theFunction);
+	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "exitloop", theFunction);
 
 	// execute mid expression (var increments or something)
 	this->compilationUnit->builder.SetInsertPoint(loopendbb);
@@ -441,6 +441,7 @@ void CodegenVisitor::visit(ForNode* n)
 	{
 		n->updateStmt->accept(this);
 	}
+
 	// if we have a condition, evaluate it
 	if (n->loopCondExpr)
 	{
@@ -457,7 +458,7 @@ void CodegenVisitor::visit(ForNode* n)
 			"ifcond"
 		);
 
-		this->compilationUnit->builder.CreateCondBr(endcondV, loopbb, outloopbb);
+		this->compilationUnit->builder.CreateCondBr(endcondV, loopbb, exitloopbb);
 	}
 	else
 	{
@@ -468,7 +469,7 @@ void CodegenVisitor::visit(ForNode* n)
 
 
 	// we continue inserting code after the for loop
-	this->compilationUnit->builder.SetInsertPoint(outloopbb);
+	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
 	this->symTable->PopScope();
 	// 	outloop:
 	// // continue generating code
@@ -478,7 +479,39 @@ void CodegenVisitor::visit(WhileNode* n)
 {
 	// this->whileExpr = std::move(whileExpr);
 	// this->loopBody = std::move(loopBody);
+	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();	// get the parent function
+	llvm::BasicBlock* headerbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopheader", theFunction);
+	llvm::BasicBlock* loopbodybb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "loopbody", theFunction);
+	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "exitloop", theFunction);
 
+	// jump to our header function so we can test our condition
+	this->compilationUnit->builder.CreateBr(headerbb);
+
+	// header is where we test the condition
+	this->compilationUnit->builder.SetInsertPoint(headerbb);
+
+	// evaluate loop condition
+	n->whileExpr->accept(this);
+	llvm::Value* endcondV = this->consumeRetValue();
+	if (!endcondV)
+	{
+		// TODO: Error out here!
+	}
+	endcondV = this->compilationUnit->builder.CreateICmpNE(
+		endcondV, 
+		llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), 0), 
+		"whilecond"
+	);
+	// on true, evaluate the loop body, on false go to the end of the loop
+	this->compilationUnit->builder.CreateCondBr(endcondV, loopbodybb, exitloopbb);
+
+	// loop body is simply the body of the while statement
+	this->compilationUnit->builder.SetInsertPoint(loopbodybb);
+	n->loopBody->accept(this);
+	this->compilationUnit->builder.CreateBr(headerbb);	
+
+	// set our insertion point to be after the loop exit
+	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
 	// while loop head:
 	// evaluate loop condition:
 	// if false jump to end while loop
