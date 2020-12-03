@@ -11,10 +11,12 @@
 #include "nodes.hpp"
 #include "compiler.hpp"
 #include "symtable.hpp"
+
 // #include "llvm/IR/IRBuilder.h"
 // #include "llvm/IR/LLVMContext.h"
 // #include "llvm/IR/Module.h"
 // #include "llvm/IR/Type.h"
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/ValueHandle.h"
 
 
@@ -22,8 +24,23 @@ class CodegenVisitor : public NodeVisitor
 {
 private:
 	llvm::Value* retValue;
-	std::map<std::string, llvm::Value*> symbolTable;
+
 	SymbolTable* symTable;
+
+	llvm::Value* consumeRetValue();
+	llvm::BasicBlock* loopHeader;
+	llvm::BasicBlock* loopExit;
+
+	llvm::Type* GetLLVMType(TypeName t);
+	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMAugmentedAssignOpsInt(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs);
+	llvm::Value* GetLLVMAugmentedAssignOpsFP(AugmentedAssignOps a, llvm::Value* lhs, llvm::Value* rhs);
+
+	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
+
 
 public:
 	CompilationUnit* compilationUnit;
@@ -31,7 +48,6 @@ public:
 	// will this live here and get init'ed somewhere else
 	CodegenVisitor();
 	~CodegenVisitor();
-	llvm::Value* consumeRetValue();
 	void setRetValue(llvm::Value* v);
 	void visit(VariableNode* n) override;
 	void visit(DeclarationNode* n) override;
@@ -60,13 +76,6 @@ public:
 	void visit(ContinueNode* n) override;	
 	void visit(ExpressionStatementNode*) override;
 
-	llvm::Type* GetLLVMType(TypeName t);
-	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMBinaryOpFP(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMRelationalOpInt(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
-	llvm::Value* GetLLVMRelationalOpFP(RelationalOps r, llvm::Value* lhs, llvm::Value* rhs);
-
-	llvm::AllocaInst* CreateEntryBlockAlloca(llvm::Function* TheFunction, std::string VarName, llvm::Type* t);
 };
 
 #endif // ECE467_CODEGEN_HPP_INCLUDED

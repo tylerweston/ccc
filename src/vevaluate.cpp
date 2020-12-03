@@ -273,11 +273,52 @@ void EvaluateVisitor::visit(ConstantIntNode* n)
 void EvaluateVisitor::visit(AssignmentNode* n) 
 {
 	// do we want to do anything here?
+	// make sure lhs and rhs are same type
+
+	n->expr->accept(this);
+
+	// grab this symbol from the symbol table
+	SymbolTableEntry* symbolTableEntry;
+	symbolTableEntry = this->symbolTable->GetSymbol(n->name);
+	// make sure this symbol had been declared already
+	if (symbolTableEntry == nullptr)
+	{
+		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Undeclared variable: " << n->name <<"\n";
+		exit(1);
+	}
+	// if it is, this expression evaluates to the type of this symbol
+	if (symbolTableEntry->Type != n->expr->evaluatedType)
+	{
+		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Type mismatch in assignment operation\n";
+		std::cout << "Trying to assign type " << TypeNameString(n->expr->evaluatedType);
+		std::cout << " to variable of type " << TypeNameString(symbolTableEntry->Type) << "\n";
+		exit(1);
+	}
 }
 
 void EvaluateVisitor::visit(AugmentedAssignmentNode* n) 
 {
 	// do we need to do anything here?
+
+	n->expr->accept(this);
+
+	// grab this symbol from the symbol table
+	SymbolTableEntry* symbolTableEntry;
+	symbolTableEntry = this->symbolTable->GetSymbol(n->name);
+	// make sure this symbol had been declared already
+	if (symbolTableEntry == nullptr)
+	{
+		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Undeclared variable: " << n->name <<"\n";
+		exit(1);
+	}
+	// if it is, this expression evaluates to the type of this symbol
+	if (symbolTableEntry->Type != n->expr->evaluatedType)
+	{
+		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Type mismatch in augmented assignment operation\n";
+		std::cout << "Trying to assign type " << TypeNameString(n->expr->evaluatedType);
+		std::cout << " to variable of type " << TypeNameString(symbolTableEntry->Type) << "\n";
+		exit(1);
+	}
 }
 
 void EvaluateVisitor::visit(BoolNode* n) 
@@ -349,20 +390,20 @@ void EvaluateVisitor::visit(ForNode* n)
 		n->initStmt->accept(this);
 	}
 	// If we have a predicate, evaluate predicate to make sure it evaluates to bool
-	if (n->midExpr)
+	if (n->loopCondExpr)
 	{
-		n->midExpr->accept(this);
-		if (n->midExpr->evaluatedType != TypeName::tBool)
+		n->loopCondExpr->accept(this);
+		if (n->loopCondExpr->evaluatedType != TypeName::tBool)
 		{
 			std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Condition of for statement must be a boolean\n";
-			std::cout << "but it evaluated to " << TypeNameString(n->midExpr->evaluatedType) << "\n";
+			std::cout << "but it evaluated to " << TypeNameString(n->loopCondExpr->evaluatedType) << "\n";
 			exit(1);
 		}
 	}
 	// If we have a conditional, check it out
-	if (n->loopCondStmt)
+	if (n->updateStmt)
 	{
-		n->loopCondStmt->accept(this);
+		n->updateStmt->accept(this);
 	}
 	// check rest of for loop
 	n->loopBody->accept(this);

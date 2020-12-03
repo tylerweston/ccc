@@ -127,11 +127,12 @@ IfNode::IfNode(std::unique_ptr<ExpressionNode> ifExpr, std::unique_ptr<Node> ifB
 }
 void IfNode::accept(NodeVisitor* v) { v->visit(this); }
 
-ForNode::ForNode(std::unique_ptr<Node> initStmt, std::unique_ptr<ExpressionNode> midExpr, std::unique_ptr<Node> loopCondStmt, std::unique_ptr<Node> loopBody)
+ForNode::ForNode(std::unique_ptr<Node> initStmt, std::unique_ptr<ExpressionNode> loopCondExpr, std::unique_ptr<Node> updateStmt, std::unique_ptr<Node> loopBody)
 {
 	this->initStmt = std::move(initStmt);
-	this->midExpr = std::move(midExpr);
-	this->loopCondStmt = std::move(loopCondStmt);
+	this->loopCondExpr = std::move(loopCondExpr);
+	this->updateStmt = std::move(updateStmt);
+
 	this->loopBody = std::move(loopBody);
 }
 void ForNode::accept(NodeVisitor* v) { v->visit(this); }
