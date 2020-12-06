@@ -335,6 +335,7 @@ void CodegenVisitor::visit(ReturnNode* n)
 	// insert ret into our basic block here but first we need to evaluate the expression to 
 	// figure out what it's value and type are. If there is no expression, it is a void return
 	// so we just return a nullptr
+	this->returnFlag = true;
 	if (n->expr)
 	{
 		n->expr->accept(this);
@@ -406,7 +407,7 @@ void CodegenVisitor::visit(ForNode* n)
 		n->initStmt->accept(this);
 	}
 
-	// loopend basic block will handle updating the variable and checking for end condition
+	// loopend basic block will handle checking for end condition
 	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forend", theFunction);
 	// This is where a continue would go to, so set our header for continue here
 	this->loopHeader = loopendbb;
