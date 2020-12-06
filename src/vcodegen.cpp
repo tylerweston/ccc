@@ -25,9 +25,9 @@
 
 CodegenVisitor::CodegenVisitor()
 {
-	// Create a new symbol table
-	std::vector<llvm::BasicBlock*> loopHeaders; // = std::vector<llvm::BasicBlock*>();
-	std::vector<llvm::BasicBlock*> loopExits; // = std::vector<llvm::BasicBlock*>();
+	// // Create a new symbol table
+	// std::vector<llvm::BasicBlock*> loopHeaders; // = std::vector<llvm::BasicBlock*>();
+	// std::vector<llvm::BasicBlock*> loopExits; // = std::vector<llvm::BasicBlock*>();
 	symTable = new SymbolTable();
 }
 
@@ -639,14 +639,14 @@ void CodegenVisitor::visit(ExpressionStatementNode* n)
 void CodegenVisitor::visit(BreakNode* n) 
 {
 	// break out a loop by jumping to the after label
-	// TODO: What about nested breaks/continues? We need a STACK of headers/exits?
+	this->returnFlag = true;
 	this->compilationUnit->builder.CreateBr(this->loopExits.back());
 }
 
 void CodegenVisitor::visit(ContinueNode* n) 
 {
 	// jump straight back to the current header label
-	// TODO: what about nested breaks/continues? We need a STACK of headers/exits?
+	this->returnFlag;
 	this->compilationUnit->builder.CreateBr(this->loopHeaders.back());
 }	
 
