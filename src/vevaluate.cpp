@@ -140,7 +140,7 @@ void EvaluateVisitor::visit(RootNode* n)
 void EvaluateVisitor::visit(BlockNode* n) 
 {
 	// there is a new scope for a block
-	this->symbolTable()->PushScope();
+	this->symbolTable->PushScope();
 	for (auto& stmt : n->stmts)
 	{
 		stmt->accept(this);
@@ -149,7 +149,7 @@ void EvaluateVisitor::visit(BlockNode* n)
 			this->hasReturn = true;
 		}
 	}
-	this->symbolTable()->PopScope();
+	this->symbolTable->PopScope();
 }
 
 void EvaluateVisitor::visit(FuncDefnNode* n) 
