@@ -646,7 +646,7 @@ void CodegenVisitor::visit(BreakNode* n)
 void CodegenVisitor::visit(ContinueNode* n) 
 {
 	// jump straight back to the current header label
-	this->returnFlag;
+	this->returnFlag = true;
 	this->compilationUnit->builder.CreateBr(this->loopHeaders.back());
 }	
 
