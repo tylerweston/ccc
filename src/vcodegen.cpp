@@ -418,6 +418,11 @@ void CodegenVisitor::visit(ForNode* n)
 	this->loopHeaders.push_back(loopendbb);
 	this->compilationUnit->builder.CreateBr(loopendbb);
 
+	// create exit block
+	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
+	// this is where a break would go to, so mark out exit
+	this->loopExits.push_back(exitloopbb);
+
 	// the loop body is reponsible for executing the actual body of the loop, then jump
 	// to loopend to increment vars and check again
 	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
@@ -435,10 +440,6 @@ void CodegenVisitor::visit(ForNode* n)
 	}
 	this->returnFlag = false;
 
-	// create exit block
-	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
-	// this is where a break would go to, so mark out exit
-	this->loopExits.push_back(exitloopbb);
 
 	// if we have a condition, evaluate it
 	this->compilationUnit->builder.SetInsertPoint(loopendbb);
