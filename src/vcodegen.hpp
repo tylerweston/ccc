@@ -24,6 +24,7 @@ class CodegenVisitor : public NodeVisitor
 {
 private:
 	llvm::Value* retValue;
+	bool returnFlag;
 
 	SymbolTable* symTable;
 

@@ -159,9 +159,15 @@ void CodegenVisitor::visit(BlockNode* n)
 {
 	// A block means we have to generate a new scope!
 	this->symTable->PushScope();
+	this->returnFlag = false;
+	// set return flag false
 	for (auto& stmt : n->stmts)
 	{
 		stmt->accept(this);
+		if (this->returnFlag)
+		{
+		     break;
+		}
 		// TODO: IF we get a return at the top level before the function is finished, we
 		// need to not generate the rest of the function!?
 	}
@@ -411,11 +417,15 @@ void CodegenVisitor::visit(ForNode* n)
 	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
 	this->compilationUnit->builder.SetInsertPoint(loopbb);
 	n->loopBody->accept(this);
-	if (n->updateStmt)
+	if (!this->returnFlag)
 	{
-		n->updateStmt->accept(this);
+		if (n->updateStmt)
+		{
+			n->updateStmt->accept(this);
+		}
+		this->compilationUnit->builder.CreateBr(loopendbb);	
 	}
-	this->compilationUnit->builder.CreateBr(loopendbb);	
+	this->returnFlag = false;
 
 	// create exit block
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
