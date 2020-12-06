@@ -7,4 +7,8 @@ extern "C" {
 		printf("putint: %d\n", x);
 	}
 
+	void putint(int32_t x) {
+		printf("putint: %d\n", x);
+	}
+
 }
