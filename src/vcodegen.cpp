@@ -261,12 +261,10 @@ void CodegenVisitor::visit(FuncCallNode* n)
 		ArgsV.push_back(this->consumeRetValue());
 		if (!ArgsV.back())
 		{
-			// TODO: This is an error, problem with evaluating expression
 			std::cout << "Error: Problem with parameter number " << i << " in function " << n->name << "\n";
 			exit(1);
 		}
 	}
-	// TODO: Maybe custom names for non-void return functions
 	this->setRetValue(this->compilationUnit->builder.CreateCall(CalleeF, ArgsV));
 }
 
@@ -393,12 +391,18 @@ void CodegenVisitor::visit(IfNode* n)
 
 void CodegenVisitor::visit(ForNode* n) 
 {
-	// TODO: Should we PushScope() here and PopScope() at the end?
-	// I don't think so since we create a new scope in the body of the for loop anyways
-	// Yes! Since we want to be able to shadow vars in the outer scope here
+	// Push scope before the for node so we support things like
+	// int i;
+	// for (int i;;)
+	// {
+	//	 int i;
+	// }
+	// just in case you want to do something like that!
 	this->symTable->PushScope();
 	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();
 
+	// generate our initialization statement, this will usually be a variable declaration
+	// so we'll alloca space for it on our stack and add it to our symbol table
 	if (n->initStmt)
 	{
 		n->initStmt->accept(this);
@@ -417,6 +421,8 @@ void CodegenVisitor::visit(ForNode* n)
 	n->loopBody->accept(this);
 	if (!this->returnFlag)
 	{
+		// if we didn't get a return flag, we'll update our variable properly and
+		// jump back to the top of the loop
 		if (n->updateStmt)
 		{
 			n->updateStmt->accept(this);
@@ -439,7 +445,8 @@ void CodegenVisitor::visit(ForNode* n)
 		llvm::Value* endcondV = this->consumeRetValue();
 		if (!endcondV)
 		{
-			// TODO: Error out here!
+			std::cout << "Error: Cannot evaluate loop condition\n";
+			exit(1);
 		}
 		endcondV = this->compilationUnit->builder.CreateICmpNE(
 			endcondV, 

@@ -140,6 +140,7 @@ void EvaluateVisitor::visit(RootNode* n)
 void EvaluateVisitor::visit(BlockNode* n) 
 {
 	// there is a new scope for a block
+	this->symbolTable()->PushScope();
 	for (auto& stmt : n->stmts)
 	{
 		stmt->accept(this);
@@ -148,6 +149,7 @@ void EvaluateVisitor::visit(BlockNode* n)
 			this->hasReturn = true;
 		}
 	}
+	this->symbolTable()->PopScope();
 }
 
 void EvaluateVisitor::visit(FuncDefnNode* n) 
@@ -373,10 +375,8 @@ void EvaluateVisitor::visit(IfNode* n)
 		exit(1);
 	}
 	// Evaluate the body of the if loop, this will create a new scope as well
-	this->symbolTable->PushScope();
 	n->ifBody->accept(this);
 	// Exit scope once we're done evaluating the function body
-	this->symbolTable->PopScope();
 }
 
 void EvaluateVisitor::visit(ForNode* n) 
@@ -423,9 +423,7 @@ void EvaluateVisitor::visit(WhileNode* n)
 		exit(1);
 	}
 	// Evaluate body of while loop
-	this->symbolTable->PushScope();
 	n->loopBody->accept(this);
-	this->symbolTable->PopScope();
 }
 
 void EvaluateVisitor::visit(UnaryNode* n) 
