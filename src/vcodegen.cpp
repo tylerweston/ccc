@@ -25,9 +25,7 @@
 
 CodegenVisitor::CodegenVisitor()
 {
-	// // Create a new symbol table
-	// std::vector<llvm::BasicBlock*> loopHeaders; // = std::vector<llvm::BasicBlock*>();
-	// std::vector<llvm::BasicBlock*> loopExits; // = std::vector<llvm::BasicBlock*>();
+	// Create a new symbol table
 	symTable = new SymbolTable();
 }
 
@@ -597,7 +595,6 @@ void CodegenVisitor::visit(TernaryNode* n)
 	n->falseExpr->accept(this);
 	llvm::Value* falseV = this->consumeRetValue();
 	this->compilationUnit->builder.CreateBr(mergeBB);
-	//trueBB = this->compilationUnit->builder.GetInsertBlock();
 
 	// use phi to choose between two above values
 	theFunction->getBasicBlockList().push_back(mergeBB);
