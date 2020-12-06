@@ -412,7 +412,7 @@ void CodegenVisitor::visit(ForNode* n)
 	// loopend basic block will handle checking for end condition
 	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forend", theFunction);
 	// This is where a continue would go to, so set our header for continue here
-	this->loopHeader = loopendbb;
+	this->loopHeaders.push_back(loopendbb);
 	this->compilationUnit->builder.CreateBr(loopendbb);
 
 	// the loop body is reponsible for executing the actual body of the loop, then jump
@@ -435,7 +435,7 @@ void CodegenVisitor::visit(ForNode* n)
 	// create exit block
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
 	// this is where a break would go to, so mark out exit
-	this->loopExit = exitloopbb;
+	this->loopExits.push_back(exitloopbb);
 
 	// if we have a condition, evaluate it
 	this->compilationUnit->builder.SetInsertPoint(loopendbb);
@@ -464,6 +464,8 @@ void CodegenVisitor::visit(ForNode* n)
 		this->compilationUnit->builder.CreateBr(loopbb);
 	}
 
+	this->loopExits.pop_back();
+	this->loopHeaders.pop_back();
 
 	// we continue inserting code after the for loop
 	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
@@ -479,7 +481,7 @@ void CodegenVisitor::visit(WhileNode* n)
 	// Setup blocks needed for while loop
 	llvm::BasicBlock* headerbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileheader", theFunction);
 	// continue would loop back to check condition again, so set properly
-	this->loopHeader = headerbb;
+	this->loopHeaders.push_back(headerbb);
 
 	// basic block for loop body
 	llvm::BasicBlock* loopbodybb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whilebody", theFunction);
@@ -487,7 +489,7 @@ void CodegenVisitor::visit(WhileNode* n)
 	// block for end of loop
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "whileexit", theFunction);
 	// break would go to the loop end, so set properly
-	this->loopExit = exitloopbb;
+	this->loopExits.push_back(exitloopbb);
 
 	// jump to our header function so we can test our condition
 	this->compilationUnit->builder.CreateBr(headerbb);
@@ -520,6 +522,8 @@ void CodegenVisitor::visit(WhileNode* n)
 		this->compilationUnit->builder.CreateBr(headerbb);	
 	}
 	this->returnFlag = false;
+	this->loopExits.pop_back();
+	this->loopHeaders.pop_back();
 
 	// set our insertion point to be after the loop exit
 	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
@@ -632,14 +636,14 @@ void CodegenVisitor::visit(BreakNode* n)
 {
 	// break out a loop by jumping to the after label
 	// TODO: What about nested breaks/continues? We need a STACK of headers/exits?
-	this->compilationUnit->builder.CreateBr(this->loopExit);
+	this->compilationUnit->builder.CreateBr(this->loopExits.back());
 }
 
 void CodegenVisitor::visit(ContinueNode* n) 
 {
 	// jump straight back to the current header label
 	// TODO: what about nested breaks/continues? We need a STACK of headers/exits?
-	this->compilationUnit->builder.CreateBr(this->loopHeader);
+	this->compilationUnit->builder.CreateBr(this->loopHeaders.back());
 }	
 
 // Helper functions for our types -> llvm types

@@ -7,6 +7,7 @@
 #include <memory>
 #include <cstdio>
 #include <map>
+#include <vector>
 #include "common.hpp"
 #include "nodes.hpp"
 #include "compiler.hpp"
@@ -29,8 +30,8 @@ private:
 	SymbolTable* symTable;
 
 	llvm::Value* consumeRetValue();
-	llvm::BasicBlock* loopHeader;
-	llvm::BasicBlock* loopExit;
+	std::vector<llvm::BasicBlock*> loopHeaders;
+	std::vector<llvm::BasicBlock*> loopExits;
 
 	llvm::Type* GetLLVMType(TypeName t);
 	llvm::Value* GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, llvm::Value* rhs);
