@@ -557,7 +557,8 @@ void CodegenVisitor::visit(TernaryNode* n)
 	llvm::Value* condV = this->consumeRetValue();
 	if (!condV)
 	{
-		std::cout << "Error: "
+		std::cout << "Error: Cannot evaluate condition of ternary expression\n";
+		exit(1);
 	}
 	// now, we turn this condition into an bool (int1) by neq'ing it with 0
 	condV = this->compilationUnit->builder.CreateICmpNE(
