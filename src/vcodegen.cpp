@@ -557,7 +557,7 @@ void CodegenVisitor::visit(TernaryNode* n)
 	llvm::Value* condV = this->consumeRetValue();
 	if (!condV)
 	{
-		// TODO: Error out here!
+		std::cout << "Error: "
 	}
 	// now, we turn this condition into an bool (int1) by neq'ing it with 0
 	condV = this->compilationUnit->builder.CreateICmpNE(
