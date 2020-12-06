@@ -25,6 +25,8 @@
 CodegenVisitor::CodegenVisitor()
 {
 	// Create a new symbol table
+	std::vector<llvm::BasicBlock*> loopHeaders = std::vector<llvm::BasicBlock*>();
+	std::vector<llvm::BasicBlock*> loopExits = std::vector<llvm::BasicBlock*>();
 	symTable = new SymbolTable();
 }
 
