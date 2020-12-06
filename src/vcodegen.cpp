@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
@@ -25,8 +26,8 @@
 CodegenVisitor::CodegenVisitor()
 {
 	// Create a new symbol table
-	std::vector<llvm::BasicBlock*> loopHeaders = std::vector<llvm::BasicBlock*>();
-	std::vector<llvm::BasicBlock*> loopExits = std::vector<llvm::BasicBlock*>();
+	std::vector<llvm::BasicBlock*> loopHeaders; // = std::vector<llvm::BasicBlock*>();
+	std::vector<llvm::BasicBlock*> loopExits; // = std::vector<llvm::BasicBlock*>();
 	symTable = new SymbolTable();
 }
 
