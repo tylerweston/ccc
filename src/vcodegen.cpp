@@ -418,15 +418,18 @@ void CodegenVisitor::visit(ForNode* n)
 	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
 	this->compilationUnit->builder.SetInsertPoint(loopbb);
 	n->loopBody->accept(this);
-	if (!this->returnFlag)
+	if (this->returnFlag)
 	{
-		if (n->updateStmt)
-		{
-			n->updateStmt->accept(this);
-		}
-		this->compilationUnit->builder.CreateBr(loopendbb);	
+		this->returnFlag = false;
+		return;
 	}
-	this->returnFlag = false;
+
+	if (n->updateStmt)
+	{
+		n->updateStmt->accept(this);
+	}
+	this->compilationUnit->builder.CreateBr(loopendbb);	
+
 
 	// create exit block
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
@@ -509,6 +512,11 @@ void CodegenVisitor::visit(WhileNode* n)
 	// loop body is simply the body of the while statement
 	this->compilationUnit->builder.SetInsertPoint(loopbodybb);
 	n->loopBody->accept(this);
+	if (this->returnFlag)
+	{
+		this->returnFlag = false;
+		return;
+	}
 	// when we're done evaluating the body, jump back to the header 
 	this->compilationUnit->builder.CreateBr(headerbb);	
 
