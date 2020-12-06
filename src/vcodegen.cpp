@@ -378,12 +378,13 @@ void CodegenVisitor::visit(IfNode* n)
 	// generate code for if body
 	this->compilationUnit->builder.SetInsertPoint(iftrueBB);
 	n->ifBody->accept(this);
-	if (this->compilationUnit->builder.GetInsertBlock()->getTerminator() == nullptr)
+	//if (this->compilationUnit->builder.GetInsertBlock()->getTerminator() == nullptr)
+	if (!this->returnFlag)
 	{
 		// If we returned in this branch, we don't want to BR out of it
 		this->compilationUnit->builder.CreateBr(ifcontBB);
 	}
-
+	this->returnFlag = false;
 	// push if continue block and make that our new insert point to continue code generation
 	theFunction->getBasicBlockList().push_back(ifcontBB);
 	this->compilationUnit->builder.SetInsertPoint(ifcontBB);
