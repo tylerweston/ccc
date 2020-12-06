@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string>
 
-// TODO: Figure out what we need/don't here
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
@@ -168,8 +167,6 @@ void CodegenVisitor::visit(BlockNode* n)
 		{
 		     break;
 		}
-		// TODO: IF we get a return at the top level before the function is finished, we
-		// need to not generate the rest of the function!?
 	}
 	this->symTable->PopScope();
 }
@@ -424,10 +421,9 @@ void CodegenVisitor::visit(ForNode* n)
 		{
 			n->updateStmt->accept(this);
 		}
+		this->compilationUnit->builder.CreateBr(loopendbb);	
 	}
 	this->returnFlag = false;
-	this->compilationUnit->builder.CreateBr(loopendbb);	
-
 
 	// create exit block
 	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
