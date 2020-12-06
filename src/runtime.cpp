@@ -3,7 +3,7 @@
 
 extern "C" {
 
-	void putint(int32_t x) {
+	void put_int(int32_t x) {
 		printf("putint: %d\n", x);
 	}
 
