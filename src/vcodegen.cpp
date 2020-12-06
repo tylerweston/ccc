@@ -57,7 +57,8 @@ void CodegenVisitor::visit(VariableNode* n)
 	llvm::AllocaInst* val = this->symTable->GetLLVMValue(n->name);
 	if (!val)
 	{
-		// TODO: error checking unknown variable name
+		std::cout << "Error: Variable " << n->name << " not found.\n";
+		exit(1);
 	}
 	// Load the value expected from that location and return int
 	llvm::Value* r = this->compilationUnit->builder.CreateLoad(val, n->name);
@@ -246,7 +247,8 @@ void CodegenVisitor::visit(FuncCallNode* n)
 	llvm::Function* CalleeF = this->compilationUnit->module->getFunction(n->name);
 	if (!CalleeF)
 	{
-		// TODO: This is an error! We can't find the function we've referenced
+		std::cout << "Error: Can't find function named " << n->name<< "\n";
+		exit(1);
 	}
 
 	std::vector<llvm::Value *> ArgsV;
@@ -257,6 +259,8 @@ void CodegenVisitor::visit(FuncCallNode* n)
 		if (!ArgsV.back())
 		{
 			// TODO: This is an error, problem with evaluating expression
+			std::cout << "Error: Problem with parameter number " << i << " in function " << n->name << "\n";
+			exit(1);
 		}
 	}
 	// TODO: Maybe custom names for non-void return functions
@@ -275,7 +279,8 @@ void CodegenVisitor::visit(AssignmentNode* n)
 	llvm::AllocaInst* lloc = this->symTable->GetLLVMValue(n->name);
 	if (!lloc)
 	{
-		// TODO: error checking here
+		std::cout << "Error: Can't find variable named " << n->name << "\n";
+		exit(1);
 	}
 	n->expr->accept(this);
 	this->compilationUnit->builder.CreateStore(this->consumeRetValue(), lloc);
@@ -288,7 +293,8 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 	llvm::AllocaInst* lloc = this->symTable->GetLLVMValue(n->name);
 	if (!lloc)
 	{
-		// TODO: error checking here
+		std::cout << "Error: Can't find variable named " << n->name << "\n";
+		exit(1);
 	}
 	llvm::Value* lval = this->compilationUnit->builder.CreateLoad(lloc, n->name);
 
@@ -347,7 +353,8 @@ void CodegenVisitor::visit(IfNode* n)
 	llvm::Value* condV = this->consumeRetValue();
 	if (!condV)
 	{
-		// TODO: Error out here!
+		std::cout << "Error: Can't evaluate condition of if statement\n";
+		exit(1);
 	}
 	// now, we turn this condition into an bool (int1) by neq'ing it with 0
 	condV = this->compilationUnit->builder.CreateICmpNE(
@@ -404,6 +411,10 @@ void CodegenVisitor::visit(ForNode* n)
 	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
 	this->compilationUnit->builder.SetInsertPoint(loopbb);
 	n->loopBody->accept(this);
+	if (n->updateStmt)
+	{
+		n->updateStmt->accept(this);
+	}
 	this->compilationUnit->builder.CreateBr(loopendbb);	
 
 	// create exit block
@@ -411,14 +422,8 @@ void CodegenVisitor::visit(ForNode* n)
 	// this is where a break would go to, so mark out exit
 	this->loopExit = exitloopbb;
 
-	// execute mid expression (var increments or something)
-	this->compilationUnit->builder.SetInsertPoint(loopendbb);
-	if (n->updateStmt)
-	{
-		n->updateStmt->accept(this);
-	}
-
 	// if we have a condition, evaluate it
+	this->compilationUnit->builder.SetInsertPoint(loopendbb);
 	if (n->loopCondExpr)
 	{
 		// evaluate loop condition
@@ -479,7 +484,8 @@ void CodegenVisitor::visit(WhileNode* n)
 	llvm::Value* endcondV = this->consumeRetValue();
 	if (!endcondV)
 	{
-		// TODO: Error out here!
+		std::cout << "Error: Can't evaluate end condition of for loop\n";
+		exit(1);
 	}
 	endcondV = this->compilationUnit->builder.CreateICmpNE(
 		endcondV, 
