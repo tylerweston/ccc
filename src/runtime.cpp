@@ -11,4 +11,7 @@ extern "C" {
 		printf("putint: %d\n", x);
 	}
 
+	void putascii(int32_t x) {
+		printf("putascii: %c\n", (char) x);
+	}
 }

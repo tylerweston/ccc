@@ -31,6 +31,7 @@ private:
 
 	llvm::Value* consumeRetValue();
 	std::vector<llvm::BasicBlock*> loopHeaders;
+	std::vector<llvm::BasicBlock*> loopFooters;
 	std::vector<llvm::BasicBlock*> loopExits;
 
 	llvm::Type* GetLLVMType(TypeName t);
