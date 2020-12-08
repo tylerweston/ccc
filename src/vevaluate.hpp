@@ -22,6 +22,7 @@ public:
 	FunctionTable* functionTable;
 	bool needReturn;
 	bool hasReturn;
+	bool inFuncDef = false;
 
 	void visit(VariableNode* n) override;
 	void visit(DeclarationNode* n) override;
