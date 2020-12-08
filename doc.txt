@@ -2,3 +2,23 @@ Tyler Weston / Stephen Keith
 997438170 /
 
 LAB 4
+
+Wow, the last lab!
+We actually compiled some stuff! Really neat to see it come together from front to end finally. Definitely plan on expanding on this after this class wraps up.
+Since we implemented Lab 3 using visitors, it was pretty easy to just add another visitor pass to get codegen up and running. This lab actually felt FAR easier
+and took far less time than lab 3.
+
+Design notes:
+- A visitor visits the nodes of our AST and generates code based on the node value.
+- We use a similar pattern as we did in semantic analysis to return values, setting a retValue in our code gen visitor and a flag
+- This value can be "consumed" (ie. used and set to null so we don't accidentally use the same return value twice) via a getter function
+- The most difficult part to figure out was the mutable variables, but mostly because we spent a lot of time trying to figure out LLVMs built-in symbol table,
+which turned out not to exist? Or at least not that we could find. So then we spent a while trying to make it work without ANY symbol table, which also didn't 
+work. Finally, after some head-scratching (and a helpful e-mail exchange with Adrian), we just implemented some more functionality in the symbol table we used
+for lab 3, and everything was smooth sailing after that.
+- Had to write a few helper functions to translates between our native datatypes (TypeName, BinaryOps, etc. enums) to the corresponding LLVM types.
+
+Some technical hightlights:
+- Handles nested breaks/continues to any depth properly
+- Won't throw warnings with return statements in the middle of functions
+- support for variable shadowing
