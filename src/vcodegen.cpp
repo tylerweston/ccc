@@ -20,9 +20,6 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/IR/ValueHandle.h"
 
-// Error generating
-#include "llvm/Support/Error.h"
-
 CodegenVisitor::CodegenVisitor()
 {
 	// Create a new symbol table
