@@ -156,6 +156,7 @@ void EvaluateVisitor::visit(FuncDefnNode* n)
 {
 	// Functions have their OWN SYMBOL TABLE! They DO NOT inherit symbols from the calling function!
 	this->symbolTable->PushScope();
+	this->inFuncDef = true;
 	// Let function table know we're going to define a function
 	std::string funcname = dynamic_cast<FuncDeclNode*>(n->funcDecl.get())->name;
 	n->funcDecl->accept(this);
@@ -188,6 +189,7 @@ void EvaluateVisitor::visit(FuncDefnNode* n)
 	// FunctionTableEntry* curfunc = this->functionTable->GetFunction(funcname);	
 
 	// tell function table we're done defining a function
+	this->inFuncDef = false;
 	this->functionTable->ExitFunctionDefinition();
 	// tell the symbo table to leave it's current scope
 	this->symbolTable->PopScope();
@@ -195,6 +197,15 @@ void EvaluateVisitor::visit(FuncDefnNode* n)
 
 void EvaluateVisitor::visit(FuncDeclNode* n) 
 {
+	// If this is a bare declaration, we don't want these variables to live ina global
+	// scope or else something like
+	// int foo(int x);
+	// int foo2(int x);
+	// will cause issues since int x will be declared twice at global scope?
+	if (!inFuncDef) 
+	{ 
+		this->symbolTable->PushScope();
+	}
 	if (this->functionTable->IsInFunctionDefinition()&&this->functionTable->IsFunctionDefined(n->name))
 	{
 		// // if we're here, we're a duplicate definition
@@ -216,6 +227,10 @@ void EvaluateVisitor::visit(FuncDeclNode* n)
 
 	// add our function to our function table
 	this->functionTable->AddFunction(n->name, n->t, paramTypes);
+	if (!inFuncDef)
+	{
+		this->symbolTable->PopScope();
+	}
 }
 
 void EvaluateVisitor::visit(FuncCallNode* n) 
