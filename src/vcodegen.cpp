@@ -390,54 +390,51 @@ void CodegenVisitor::visit(IfNode* n)
 
 void CodegenVisitor::visit(ForNode* n) 
 {
-	// Push scope before the for node so we support things like
-	// int i;
-	// for (int i;;)
-	// {
-	//	 int i;
-	// }
-	// just in case you want to do something like that!
+
+	// We push scope before we start the loop, then once in the body, to allow variable shadowing
+	// in our init statements; so something like
+	// int i = 0;
+	// for (int i = 0;;)
+	// { int i = 0; }
+	// is legal
 	this->symTable->PushScope();
 	llvm::Function* theFunction = this->compilationUnit->builder.GetInsertBlock()->getParent();
 
-	// generate our initialization statement, this will usually be a variable declaration
-	// so we'll alloca space for it on our stack and add it to our symbol table
+	// evaluate initialization statement
 	if (n->initStmt)
 	{
 		n->initStmt->accept(this);
 	}
 
-	// loopend basic block will handle checking for end condition
-	llvm::BasicBlock* loopendbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forend", theFunction);
-	// This is where a continue would go to, so set our header for continue here
-	this->loopHeaders.push_back(loopendbb);
-	this->compilationUnit->builder.CreateBr(loopendbb);
+	// loop condition check bb
+	llvm::BasicBlock* checkConditionBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "checkcond", theFunction); 
+	// first thing a for loop does after initialization is check its condition
+	this->compilationUnit->builder.CreateBr(checkConditionBB);
+
+
+	// update
+	llvm::BasicBlock* updateBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "update", theFunction);
+	this->compilationUnit->builder.SetInsertPoint(updateBB);
+	// when we continue, we want to jump here
+	this->loopHeaders.push_back(updateBB);
+	// evaluate the update condition 
+	if (n->updateStmt)
+	{
+		n->updateStmt->accept(this);
+	}
+	// after we update our var, check our condition to see if we continue our for loop
+	this->compilationUnit->builder.CreateBr(checkConditionBB);
 
 	// create exit block
-	llvm::BasicBlock* exitloopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
+	llvm::BasicBlock* exitLoopBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forexit", theFunction);
 	// this is where a break would go to, so mark out exit
-	this->loopExits.push_back(exitloopbb);
+	this->loopExits.push_back(exitLoopBB);
 
-	// the loop body is reponsible for executing the actual body of the loop, then jump
-	// to loopend to increment vars and check again
-	llvm::BasicBlock* loopbb = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
-	this->compilationUnit->builder.SetInsertPoint(loopbb);
-	n->loopBody->accept(this);
-	if (!this->returnFlag)
-	{
-		// if we didn't get a return flag, we'll update our variable properly and
-		// jump back to the top of the loop
-		if (n->updateStmt)
-		{
-			n->updateStmt->accept(this);
-		}
-		this->compilationUnit->builder.CreateBr(loopendbb);	
-	}
-	this->returnFlag = false;
-
+	// create loop body basic block, since we need to reference it now
+	llvm::BasicBlock* loopBodyBB = llvm::BasicBlock::Create(*(this->compilationUnit->context.get()), "forbody", theFunction);
 
 	// if we have a condition, evaluate it
-	this->compilationUnit->builder.SetInsertPoint(loopendbb);
+	this->compilationUnit->builder.SetInsertPoint(checkConditionBB);
 	if (n->loopCondExpr)
 	{
 		// evaluate loop condition
@@ -451,25 +448,48 @@ void CodegenVisitor::visit(ForNode* n)
 		endcondV = this->compilationUnit->builder.CreateICmpNE(
 			endcondV, 
 			llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), 0), 
-			"ifcond"
+			"forcond"
 		);
 
-		this->compilationUnit->builder.CreateCondBr(endcondV, loopbb, exitloopbb);
+		this->compilationUnit->builder.CreateCondBr(endcondV, loopBodyBB, exitLoopBB);
 	}
 	else
 	{
 		// otherwise, we are just like for(...;...;)
 		// so we just loop anyways!
-		this->compilationUnit->builder.CreateBr(loopbb);
+		this->compilationUnit->builder.CreateBr(loopBodyBB);
 	}
 
+
+	// loop body
+	this->compilationUnit->builder.SetInsertPoint(loopBodyBB);
+	n->loopBody->accept(this);
+	if (!this->returnFlag)
+	{
+		// if we didn't get a return flag, we'll update our variable properly and
+		// jump back to the top of the loop
+		if (n->updateStmt)
+		{
+			// n->updateStmt->accept(this);
+			this->compilationUnit->builder.CreateBr(updateBB);
+		}
+		else
+		{
+			// if we don
+			this->compilationUnit->builder.CreateBr(checkConditionBB);
+		}
+		// this->compilationUnit->builder.CreateBr(updateBB);	
+	}
+	this->returnFlag = false;
+
+	// when we're done evaluating the loop, we don't need our break/continue points anymore
 	this->loopExits.pop_back();
 	this->loopHeaders.pop_back();
+	// and we're done with the outer for loop scope as well
+	this->symTable->PopScope();
 
 	// we continue inserting code after the for loop
-	this->compilationUnit->builder.SetInsertPoint(exitloopbb);
-	this->symTable->PopScope();
-	// continue generating code
+	this->compilationUnit->builder.SetInsertPoint(exitLoopBB);
 }
 
 void CodegenVisitor::visit(WhileNode* n) 
