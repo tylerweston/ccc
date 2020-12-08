@@ -9,5 +9,6 @@ int main()
         int i =5;
         putint(i);
     }
+    putint(i);
     return 0;
 }
