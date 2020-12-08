@@ -8,6 +8,10 @@ We actually compiled some stuff! Really neat to see it come together from front 
 Since we implemented Lab 3 using visitors, it was pretty easy to just add another visitor pass to get codegen up and running. This lab actually felt FAR easier
 and took far less time than lab 3.
 
+We worked on almost the entire project together over VS live code while on a Discord voice chat. This allowed us to catch errors for each other and offer suggestions
+as the code was being written. The two aspects that were more individual was Tyler implementing handling mutable variables and Stephen writing all the tests and 
+testing suite.
+
 Design notes:
 - A visitor visits the nodes of our AST and generates code based on the node value.
 - We use a similar pattern as we did in semantic analysis to return values, setting a retValue in our code gen visitor and a flag
