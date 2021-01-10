@@ -53,8 +53,7 @@ int main(int argc, char** argv) {
 		std::cout << "Error generating llvm IR\n";
 		return 1;
 	}
-	u->dump(argv[2] + ".ll"s, cmds.printir);	// this will be the generated code
-	// todo: display generated llvm ir
+	u->dump(cmds.filename + ".ll"s, cmds.printir);	// this will be the generated code
 	return 0;
 }
 
