@@ -1,8 +1,8 @@
 /*
 	CodeGen
 */
-#ifndef ECE467_CODEGEN_HPP_INCLUDED
-#define ECE467_CODEGEN_HPP_INCLUDED
+#ifndef CCC_CODEGEN_HPP_INCLUDED
+#define CCC_CODEGEN_HPP_INCLUDED
 
 #include <memory>
 #include <cstdio>
@@ -13,10 +13,6 @@
 #include "compiler.hpp"
 #include "symtable.hpp"
 
-// #include "llvm/IR/IRBuilder.h"
-// #include "llvm/IR/LLVMContext.h"
-// #include "llvm/IR/Module.h"
-// #include "llvm/IR/Type.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/ValueHandle.h"
 
@@ -81,4 +77,4 @@ public:
 
 };
 
-#endif // ECE467_CODEGEN_HPP_INCLUDED
+#endif // CCC_CODEGEN_HPP_INCLUDED

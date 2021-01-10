@@ -1,8 +1,8 @@
 /*
 	EvaluateVisitor
 */
-#ifndef ECE467_EVALUATE_HPP_INCLUDED
-#define ECE467_EVALUATE_HPP_INCLUDED
+#ifndef CCC_EVALUATE_HPP_INCLUDED
+#define CCC_EVALUATE_HPP_INCLUDED
 
 #include <memory>
 #include <cstdio>
@@ -52,4 +52,4 @@ public:
 	void visit(ExpressionStatementNode*) override;
 };
 
-#endif // ECE467_PRINTER_HPP_INCLUDED
+#endif // CCC_PRINTER_HPP_INCLUDED

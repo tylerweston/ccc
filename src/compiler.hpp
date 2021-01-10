@@ -1,5 +1,5 @@
-#ifndef ECE467_COMPILER_HPP_INCLUDED
-#define ECE467_COMPILER_HPP_INCLUDED
+#ifndef CCC_COMPILER_HPP_INCLUDED
+#define CCC_COMPILER_HPP_INCLUDED
 
 #include "llvm/Support/Error.h"
 #include "llvm/IR/LLVMContext.h"
@@ -27,17 +27,20 @@ public:
 
 	CompilationUnit();
 	bool process(Node*);
-	// std::optional<llvm::Error> build();
-	std::error_code dump(std::string);
-	// int run(int, char**);
-
-// TODO: look at friend class to consider making this private
-	// using MainFunction = std::function<int(int, char**)>;
+	std::error_code dump(std::string, int);
 
 	std::unique_ptr<llvm::LLVMContext> context;
 	llvm::IRBuilder<> builder;
 	std::unique_ptr<llvm::Module> module;
-	// MainFunction main;
 };
 
-#endif // ECE467_COMPILER_HPP_INCLUDED
+struct cmd_line_args
+{
+	int printflag;
+	int lexflag;
+	int printir;
+	int optlevel;
+	char* filename;
+};
+
+#endif // CCC_COMPILER_HPP_INCLUDED

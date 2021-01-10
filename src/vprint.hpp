@@ -1,8 +1,8 @@
 /*
 	PrintVisitor
 */
-#ifndef ECE467_PRINTER_HPP_INCLUDED
-#define ECE467_PRINTER_HPP_INCLUDED
+#ifndef CCC_PRINTER_HPP_INCLUDED
+#define CCC_PRINTER_HPP_INCLUDED
 
 #include <memory>
 #include <cstdio>
@@ -42,4 +42,4 @@ public:
 	void indent();
 };
 
-#endif // ECE467_PRINTER_HPP_INCLUDED
+#endif // CCC_PRINTER_HPP_INCLUDED

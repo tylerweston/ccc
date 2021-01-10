@@ -3,8 +3,8 @@
 	Tyler Weston for ECE467
 */
 
-#ifndef ECE467_COMMON_HPP_INCLUDED
-#define ECE467_COMMON_HPP_INCLUDED
+#ifndef CCC_COMMON_HPP_INCLUDED
+#define CCC_COMMON_HPP_INCLUDED
 
 #include <memory>
 #include <string>
@@ -126,5 +126,5 @@ enum class AugmentedAssignOps
 };
 std::string AugmentedAssignOpsString(AugmentedAssignOps a);
 
-#endif // ECE467_COMMON_HPP_INCLUDED
+#endif // CCC_COMMON_HPP_INCLUDED
 

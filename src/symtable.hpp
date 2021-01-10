@@ -3,8 +3,8 @@
  header file for managing symbol table
 */
 
-#ifndef ECE467_SYMTABLE_HPP_INCLUDED
-#define ECE467_SYMTABLE_HPP_INCLUDED
+#ifndef CCC_SYMTABLE_HPP_INCLUDED
+#define CCC_SYMTABLE_HPP_INCLUDED
 
 #include <string>
 #include <map>
@@ -82,4 +82,4 @@ public:
 	void CleanUpFunctionTable();
 };
 
-#endif	// ECE467_SYMTABLE_HPP_INCLUDED
+#endif	// CCC_SYMTABLE_HPP_INCLUDED

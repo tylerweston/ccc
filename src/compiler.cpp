@@ -26,11 +26,13 @@
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 
 // Standard Libraries.
+// TODO: Change printfs to std::couts
 #include <cstdio>
 #include <cassert>
 #include <cstring>
 
-int lex(char const* path) {
+int lex(char const* path) 
+{
 	FILE* in = fopen(path, "r");
 	if (in == nullptr) {
 		printf("[error] unable to open file: %s\n", std::strerror(errno));
@@ -58,7 +60,8 @@ int lex(char const* path) {
 	return 0;
 }
 
-int parse(char const* path, std::unique_ptr<Node>& root) {
+int parse(char const* path, std::unique_ptr<Node>& root) 
+{
 	FILE* in = fopen(path, "r");
 	if (in == nullptr) {
 		printf("[error] unable to open file: %s\n", std::strerror(errno));
@@ -79,7 +82,8 @@ int parse(char const* path, std::unique_ptr<Node>& root) {
 	return x;
 }
 
-bool verify_ast(Node* root) {
+bool verify_ast(Node* root) 
+{
 	// Semantic check of our generated AST
 
 	// create our symbol table and function table
@@ -116,7 +120,8 @@ bool verify_ast(Node* root) {
 	return true;	// if we get here, we haven't hit any semantic errors
 }
 
-std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) {
+std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) 
+{
 	// Optimize our AST by performing some simplifications
 	OptimizeVisitor optimizeVisitor;
 
@@ -130,14 +135,17 @@ std::unique_ptr<Node> optimize(std::unique_ptr<Node> root) {
 	return root;
 }
 
-void print_ast(Node* root) {
+void print_ast(Node* root) 
+{
 	// Use Visitor pattern to print our generated AST
 	PrintVisitor printVisitor;
 	root->accept(&printVisitor);
 	return;
 }
 
-std::unique_ptr<CompilationUnit> compile(Node* root) {
+std::unique_ptr<CompilationUnit> compile(Node* root) 
+{
+	// run the  compilation process
 	std::unique_ptr<CompilationUnit> unit = std::make_unique<CompilationUnit>();
 	if (!unit->process(root)) {
 		return nullptr;
@@ -145,51 +153,37 @@ std::unique_ptr<CompilationUnit> compile(Node* root) {
 	return unit;
 }
 
-void CompilationUnit::initialize() {
+void CompilationUnit::initialize() 
+{
 	llvm::InitializeNativeTarget();
 }
 
-CompilationUnit::CompilationUnit() : context(std::make_unique<llvm::LLVMContext>()), builder(*this->context) {
-	this->module = std::make_unique<llvm::Module>("ece467", *this->context);
+CompilationUnit::CompilationUnit() : context(std::make_unique<llvm::LLVMContext>()), builder(*this->context) 
+{
+	// todo: make this module named after the filename
+	this->module = std::make_unique<llvm::Module>("ccc", *this->context);
 }
 
-bool CompilationUnit::process(Node* root) {
-	// TODO: lab 4
+bool CompilationUnit::process(Node* root) 
+{
+	// Generate our llvm IR code
 	CodegenVisitor codegenVisitor;
 	codegenVisitor.compilationUnit = this;
 	root->accept(&codegenVisitor);
-	// ^^^^^
+
 	llvm::verifyModule(*this->module, &llvm::errs());
 	return true;
 }
 
-std::error_code CompilationUnit::dump(std::string path) {
+std::error_code CompilationUnit::dump(std::string path, int print_ir) 
+{
 	std::error_code ec;
 	llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OpenFlags::F_None);
 	this->module->print(out, nullptr);
+	if (print_ir)
+	{
+		// print our generated llvm to stdout
+		this->module->print(llvm::outs(), nullptr);
+	}
 	return ec;
 }
-
-// int CompilationUnit::run(int argc, char** argv) {
-// 	if (this->main == nullptr) {
-// 		return -1;
-// 	}
-// 	return this->main(argc, argv);
-// }
-
-// std::optional<llvm::Error> CompilationUnit::build() {
-// 	llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit = llvm::orc::LLJITBuilder{}.create();
-// 	if (!jit) {
-// 		return jit.takeError();
-// 	}
-// 	llvm::Error e = (*jit)->addIRModule(llvm::orc::ThreadSafeModule { std::move(this->module), std::move(this->context) });
-// 	if (e) {
-// 		return e;
-// 	}
-// 	llvm::Expected<llvm::JITEvaluatedSymbol> entry = (*jit)->lookup("main");
-// 	if (!entry) {
-// 		return entry.takeError();
-// 	}
-// 	this->main = reinterpret_cast<int(*)(int, char**)>(entry->getAddress());
-// 	return std::nullopt;
-// }

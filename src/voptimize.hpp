@@ -1,8 +1,8 @@
 /*
 	PrintVisitor
 */
-#ifndef ECE467_OPTIMIZE_HPP_INCLUDED
-#define ECE467_OPTIMIZE_HPP_INCLUDED
+#ifndef CCC_OPTIMIZE_HPP_INCLUDED
+#define CCC_OPTIMIZE_HPP_INCLUDED
 
 #include <memory>
 #include <cstdio>
@@ -50,4 +50,4 @@ public:
 
 };
 
-#endif // ECE467_PRINTER_HPP_INCLUDED
+#endif // CCC_PRINTER_HPP_INCLUDED

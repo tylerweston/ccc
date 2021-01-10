@@ -300,6 +300,7 @@ void PrintVisitor::visit(ForNode* n)
 	std::cout << "LoopBody {\n";
 	this->indent_level++;
 	n->loopBody->accept(this);
+
 	// end loop body
 	this->indent_level--;
 	this->indent();
@@ -368,7 +369,7 @@ void PrintVisitor::visit(CastExpressionNode* n)
 
 void PrintVisitor::visit(ExpressionStatementNode* n)
 {
-	// This is a wrapper node, so such pass to child
+	// This is a wrapper node, so just pass to child
 	n->expr->accept(this);
 }
 

@@ -1,5 +1,5 @@
-#ifndef ECE467_NODE_HPP_INCLUDED
-#define ECE467_NODE_HPP_INCLUDED
+#ifndef CCC_NODE_HPP_INCLUDED
+#define CCC_NODE_HPP_INCLUDED
 
 #include "location.hh"
 #include "common.hpp"
@@ -101,7 +101,9 @@ public:
 	BinaryOps op;
 	std::unique_ptr<ExpressionNode> left;
 	std::unique_ptr<ExpressionNode> right;
-	BinaryOpNode(BinaryOps operation, std::unique_ptr<ExpressionNode> left, std::unique_ptr<ExpressionNode> right);
+	BinaryOpNode(BinaryOps operation, 
+		std::unique_ptr<ExpressionNode> left, 
+		std::unique_ptr<ExpressionNode> right);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -111,7 +113,9 @@ public:
 	RelationalOps op;
 	std::unique_ptr<ExpressionNode> left;
 	std::unique_ptr<ExpressionNode> right;
-	RelationalOpNode(RelationalOps operation, std::unique_ptr<ExpressionNode> left, std::unique_ptr<ExpressionNode> right);
+	RelationalOpNode(RelationalOps operation, 
+		std::unique_ptr<ExpressionNode> left, 
+		std::unique_ptr<ExpressionNode> right);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -121,7 +125,9 @@ public:
 	BinaryOps op;
 	std::unique_ptr<ExpressionNode> left;
 	std::unique_ptr<ExpressionNode> right;
-	LogicalOpNode(BinaryOps operation, std::unique_ptr<ExpressionNode> left, std::unique_ptr<ExpressionNode> right);
+	LogicalOpNode(BinaryOps operation, 
+		std::unique_ptr<ExpressionNode> left, 
+		std::unique_ptr<ExpressionNode> right);
 	virtual void accept(NodeVisitor* v) override;	
 };
 
@@ -184,7 +190,9 @@ public:
 	AugmentedAssignOps op;
 	std::string name;
 	std::unique_ptr<ExpressionNode> expr;	// the expression we are going to assign to name
-	AugmentedAssignmentNode(AugmentedAssignOps op, std::string name, std::unique_ptr<ExpressionNode> expr);
+	AugmentedAssignmentNode(AugmentedAssignOps op, 
+		std::string name, 
+		std::unique_ptr<ExpressionNode> expr);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -228,7 +236,10 @@ public:
 	std::unique_ptr<ExpressionNode> loopCondExpr;
 	std::unique_ptr<Node> updateStmt;
 	std::unique_ptr<Node> loopBody; 
-	ForNode(std::unique_ptr<Node> initStmt, std::unique_ptr<ExpressionNode> midExpr, std::unique_ptr<Node> loopCondStmt, std::unique_ptr<Node> loopBody);
+	ForNode(std::unique_ptr<Node> initStmt, 
+		std::unique_ptr<ExpressionNode> midExpr, 
+		std::unique_ptr<Node> loopCondStmt, 
+		std::unique_ptr<Node> loopBody);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -237,7 +248,8 @@ class WhileNode : public StatementNode
 public:
 	std::unique_ptr<ExpressionNode> whileExpr;
 	std::unique_ptr<Node> loopBody;
-	WhileNode(std::unique_ptr<ExpressionNode> whileExpr, std::unique_ptr<Node> loopBody);
+	WhileNode(std::unique_ptr<ExpressionNode> whileExpr, 
+		std::unique_ptr<Node> loopBody);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -255,7 +267,9 @@ public:
 	std::unique_ptr<ExpressionNode> condExpr;
 	std::unique_ptr<ExpressionNode> trueExpr;
 	std::unique_ptr<ExpressionNode> falseExpr;
-	TernaryNode(std::unique_ptr<ExpressionNode> condExpr, std::unique_ptr<ExpressionNode> trueExpr, std::unique_ptr<ExpressionNode> falseExpr);
+	TernaryNode(std::unique_ptr<ExpressionNode> condExpr, 
+		std::unique_ptr<ExpressionNode> trueExpr, 
+		std::unique_ptr<ExpressionNode> falseExpr);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -290,5 +304,5 @@ public:
 	virtual void accept(NodeVisitor* v) override;
 };
 
-#endif // ECE467_NODE_HPP_INCLUDED
+#endif // CCC_NODE_HPP_INCLUDED
 													
