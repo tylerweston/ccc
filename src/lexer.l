@@ -4,7 +4,7 @@
 
 #include "bridge.hpp"
 #include <string>
-#include "nodes.hpp"	// so we can use our enum class (??)
+#include "nodes.hpp"	// so we can use our enum classes
 
 #define GET_COLUMN() yyget_extra(yyscanner)
 #define SET_COLUMN(x) yyset_extra((x), yyscanner)

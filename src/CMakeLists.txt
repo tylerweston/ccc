@@ -9,6 +9,7 @@ set(SOURCES
 	vprint.cpp
 	voptimize.cpp
 	symtable.cpp
+	preprocess.cpp
 	)
 
 find_package(FLEX)
