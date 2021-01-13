@@ -10,12 +10,13 @@
 #include <optional>
 #include <functional>
 #include <system_error>
+#include <string>
 
 class Node;
 class CompilationUnit;
 
 int lex(char const*);
-int parse(char const*, std::unique_ptr<Node>&);
+int parse(const std::string, std::unique_ptr<Node>&);
 bool verify_ast(Node*);
 std::unique_ptr<Node> optimize(std::unique_ptr<Node>);
 void print_ast(Node*);

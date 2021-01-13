@@ -60,9 +60,9 @@ int lex(char const* path)
 	return 0;
 }
 
-int parse(char const* path, std::unique_ptr<Node>& root) 
+int parse(const std::string path, std::unique_ptr<Node>& root) 
 {
-	FILE* in = fopen(path, "r");
+	FILE* in = fopen(path.c_str(), "r");
 	if (in == nullptr) {
 		printf("[error] unable to open file: %s\n", std::strerror(errno));
 		return 1;

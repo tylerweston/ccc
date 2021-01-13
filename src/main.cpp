@@ -6,6 +6,7 @@
 
 #include "compiler.hpp"
 #include "nodes.hpp"
+#include "preprocess.hpp"
 #include <string>
 #include <unistd.h>
 
@@ -14,6 +15,7 @@ int parse_commands(int, char**, cmd_line_args*);
 static void usage();
 
 int main(int argc, char** argv) {
+	std::cout << "cimple c compiler - Tyler Weston - 2020\n";
  	cmd_line_args cmds;
 	parse_commands(argc, argv, &cmds);
 	// make sure we got a file
@@ -25,28 +27,50 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	// show our lexing if we get the lexing flag
 	if (cmds.lexflag)
 	{
 		lex(cmds.filename);
 	}
-	std::cout << "cimple c compiler - Tyler Weston - 2020\n";
+
+	// preprocessing
+	std::cout << "Preprocessing file " << cmds.filename << "\n";
+	preprocess* pp = new preprocess();
+	pp->preprocess_file(cmds.filename, cmds.filename + ".pp"s);
+
+	// parsing
+	std::cout << "Parsing file " << cmds.filename << ".pp\n";
 	std::unique_ptr<Node> root;
-	int ret = parse(cmds.filename, root);
+	int ret = parse(cmds.filename + ".pp"s, root);
 	if (ret != 0) {
 		return 1;
 	}
+
+	// semantic analysis
+	std::cout << "Performing semantic analysis\n";
 	if (!verify_ast(root.get())) {
 		std::cout << "Semantic analysis failed.\n";
 		return 1;
 	}
 	if (cmds.printflag)
 	{
+		std::cout << "Generated AST (pre-optimization):\n";
 		print_ast(root.get());
 	}
+
+	// optimization
 	if (cmds.optlevel == 1)
 	{
+		std::cout << "Optimizing AST\n";
 		root = optimize(std::move(root));
 	}
+	if (cmds.printflag)
+	{
+		std::cout << "Generated AST (post-optimization):\n";
+		print_ast(root.get());
+	}
+
+	std::cout << "Generating IR\n";
 	std::unique_ptr<CompilationUnit> u = compile(root.get());
 	if (u == nullptr)
 	{
@@ -54,6 +78,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	u->dump(cmds.filename + ".ll"s, cmds.printir);	// this will be the generated code
+
+	std::cout << "All done!\n";
 	return 0;
 }
 
