@@ -42,7 +42,9 @@ class FuncCallNode;
 class ConstantIntNode;
 class AssignmentNode;
 class AugmentedAssignmentNode;
-class BoolNode;
+class ConstantBoolNode;
+class ConstantCharNode;
+class ConstantDoubleNode;
 class ReturnNode;
 class ConstantFloatNode;
 class IfNode;
@@ -72,7 +74,9 @@ public:
 	virtual void visit(ConstantIntNode*) = 0;
 	virtual void visit(AssignmentNode*) = 0;
 	virtual void visit(AugmentedAssignmentNode*) = 0;
-	virtual void visit(BoolNode*) = 0;
+	virtual void visit(ConstantBoolNode*) = 0;
+	virtual void visit(ConstantCharNode*) = 0;
+	virtual void visit(ConstantDoubleNode*) = 0;
 	virtual void visit(ReturnNode*) = 0;
 	virtual void visit(ConstantFloatNode*) = 0;
 	virtual void visit(IfNode*) = 0;
@@ -91,7 +95,9 @@ enum class TypeName
 	tVoid,
 	tInt,
 	tFloat,
-	tBool
+	tBool,
+	tChar,
+	tDouble
 };
 std::string TypeNameString(TypeName t);
 

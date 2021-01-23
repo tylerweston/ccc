@@ -21,13 +21,29 @@ ConstantFloatNode::ConstantFloatNode(float in)
 }
 void ConstantFloatNode::accept(NodeVisitor* v) { v->visit(this); }
 
-BoolNode::BoolNode(bool in) 
+ConstantBoolNode::ConstantBoolNode(bool in) 
 { 
 	this->boolValue = in; 
 	this->isConstant = true; 
 	this->evaluatedType = TypeName::tBool;
 }
-void BoolNode::accept(NodeVisitor* v) { v->visit(this); }
+void ConstantBoolNode::accept(NodeVisitor* v) { v->visit(this); }
+
+ConstantCharNode::ConstantCharNode(char in)
+{
+	this->charValue = in;
+	this->isConstant = true;
+	this->evaluatedType = TypeName::tChar;
+}
+void ConstantCharNode::accept(NodeVisitor* v) { v->visit(this); }
+
+ConstantDoubleNode::ConstantDoubleNode(double in)
+{
+	this->doubleValue = in;
+	this->isConstant = true;
+	this->evaluatedType = TypeName::tChar;
+}
+void ConstantDoubleNode::accept(NodeVisitor* v) { v->visit(this); }
 
 VariableNode::VariableNode(std::string in): name(in) {}
 void VariableNode::accept(NodeVisitor* v) { v->visit(this); }

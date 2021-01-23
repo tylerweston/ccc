@@ -52,6 +52,8 @@ public:
 		int intValue;
 		float floatValue;
 		bool boolValue;
+		char charValue;
+		double doubleValue;
 	};
 };
 
@@ -196,11 +198,11 @@ public:
 	virtual void accept(NodeVisitor* v) override;
 };
 
-class BoolNode : public ExpressionNode, public ConstantNode
+class ConstantBoolNode : public ExpressionNode, public ConstantNode
 {
 public:
 	//bool value;
-	BoolNode(bool in);
+	ConstantBoolNode(bool in);
 	virtual void accept(NodeVisitor* v) override;
 };
 
@@ -217,6 +219,20 @@ class ConstantFloatNode : public ExpressionNode, public ConstantNode
 public:
 	//float value;
 	ConstantFloatNode(float in);
+	virtual void accept(NodeVisitor* v) override;
+};
+
+class ConstantCharNode : public ExpressionNode, public ConstantNode
+{
+public:
+	ConstantCharNode(char in);
+	virtual void accept(NodeVisitor* v) override;
+};
+
+class ConstantDoubleNode : public ExpressionNode, public ConstantNode
+{
+public:
+	ConstantDoubleNode(double in);
 	virtual void accept(NodeVisitor* v) override;
 };
 

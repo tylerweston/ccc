@@ -72,7 +72,7 @@ void PrintVisitor::visit(LogicalOpNode* n)
 void PrintVisitor::visit(RelationalOpNode* n) 
 {
 	this->indent();
-	std::cout << "RelationalyOp (" << n->location.begin.line << ", " << n->location.begin.column << ") {\n";
+	std::cout << "RelationalOp (" << n->location.begin.line << ", " << n->location.begin.column << ") {\n";
 	this->indent_level++;
 	n->left->accept(this);
 	this->indent();
@@ -179,6 +179,18 @@ void PrintVisitor::visit(ConstantIntNode* n)
 	std::cout << "Integer (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << n->intValue << " }\n";
 }
 
+void PrintVisitor::visit(ConstantCharNode* n) 
+{
+	this->indent();
+	std::cout << "Char (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << n->charValue << " }\n";
+}
+
+void PrintVisitor::visit(ConstantDoubleNode* n) 
+{
+	this->indent();
+	std::cout << "Double (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << n->doubleValue << " }\n";
+}
+
 void PrintVisitor::visit(AssignmentNode* n) 
 {
 	this->indent();
@@ -209,7 +221,7 @@ void PrintVisitor::visit(AugmentedAssignmentNode* n)
 	std::cout << "}\n";
 }
 
-void PrintVisitor::visit(BoolNode* n) 
+void PrintVisitor::visit(ConstantBoolNode* n) 
 {
 	this->indent();
 	std::cout << "Bool (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << (n->boolValue?"true":"false") << " }\n";

@@ -15,6 +15,10 @@ std::string TypeNameString(TypeName t)
 			return "float";
 		case TypeName::tBool:
 			return "bool";
+		case TypeName::tChar:
+			return "char";
+		case TypeName::tDouble:
+			return "double";
 		default:
 			return "undefined";
 	}

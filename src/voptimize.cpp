@@ -121,7 +121,7 @@ void OptimizeVisitor::visit(LogicalOpNode* n)
 			}
 
 			bool result = op(lvalue, rvalue);
-			this->repl_expr_node = make_node<BoolNode>(n->location, result);
+			this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 			this->cleanTree = false;
 			this->hasReplacement = true;
 		}
@@ -146,7 +146,7 @@ void OptimizeVisitor::visit(LogicalOpNode* n)
 					break;
 			}
 			bool result = op(lvalue, rvalue);
-			this->repl_expr_node = make_node<BoolNode>(n->location, result);
+			this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 			this->cleanTree = false;
 			this->hasReplacement = true;
 		}
@@ -154,8 +154,8 @@ void OptimizeVisitor::visit(LogicalOpNode* n)
 		// logical operator with bool operands
 		if (n->right->evaluatedType == TypeName::tBool)
 		{
-			float lvalue = dynamic_cast<BoolNode*>(n->left.get())->floatValue;
-			float rvalue = dynamic_cast<BoolNode*>(n->right.get())->floatValue;
+			float lvalue = dynamic_cast<ConstantBoolNode*>(n->left.get())->floatValue;
+			float rvalue = dynamic_cast<ConstantBoolNode*>(n->right.get())->floatValue;
 
 			std::function<bool(bool,bool)> op;
 			switch (n->op)
@@ -171,7 +171,7 @@ void OptimizeVisitor::visit(LogicalOpNode* n)
 					break;
 			}
 			bool result = op(lvalue, rvalue);
-			this->repl_expr_node = make_node<BoolNode>(n->location, result);
+			this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 			this->cleanTree = false;
 			this->hasReplacement = true;
 		}
@@ -269,6 +269,36 @@ void OptimizeVisitor::visit(BinaryOpNode* n)
 			this->cleanTree = false;
 			this->hasReplacement = true;
 		}
+		if (n->right->evaluatedType == TypeName::tDouble)
+		{
+			double lvalue = dynamic_cast<ConstantDoubleNode*>(n->left.get())->doubleValue;
+			double rvalue = dynamic_cast<ConstantDoubleNode*>(n->right.get())->doubleValue;
+
+			std::function<double(double,double)> op;
+			switch (n->op)
+			{
+				case BinaryOps::Plus:
+					op = _add<float>;
+					break;
+				case BinaryOps::Minus:
+					op = _sub<float>;
+					break;
+				case BinaryOps::Star:
+					op = _mul<float>;
+					break;
+				case BinaryOps::Slash:
+					op = _div<float>;
+					break;
+				default:
+					op = _add<float>;	// default placeholder, should never happen
+					break;
+			}
+			double result = op(lvalue, rvalue);
+			this->repl_expr_node = make_node<ConstantDoubleNode>(n->location, result);
+			this->cleanTree = false;
+			this->hasReplacement = true;
+		}
+
 	}
 }
 
@@ -296,6 +326,8 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 	}
 	if (!(n->left->isConstant&&n->right->isConstant))
 		return;
+	// TODO: Gotta figure out a better way to do this!
+	// is the same code a bunch of times! Maybe a template?
 	// int relationals
 	if (n->left->evaluatedType == TypeName::tInt)
 	{
@@ -329,7 +361,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 		}
 
 		bool result = op(lvalue, rvalue);
-		this->repl_expr_node = make_node<BoolNode>(n->location, result);
+		this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 		this->cleanTree = false;
 		this->hasReplacement = true;
 	}
@@ -365,15 +397,92 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 				break;
 		}
 		bool result = op(lvalue, rvalue);
-		this->repl_expr_node = make_node<BoolNode>(n->location, result);
+		this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 		this->cleanTree = false;
 		this->hasReplacement = true;
 	}
+
+	// relational double stuff	
+	if (n->right->evaluatedType == TypeName::tDouble)
+	{
+		double lvalue = dynamic_cast<ConstantDoubleNode*>(n->left.get())->doubleValue;
+		double rvalue = dynamic_cast<ConstantDoubleNode*>(n->right.get())->doubleValue;
+
+		std::function<bool(double,double)> op;
+		switch (n->op)
+		{
+			case RelationalOps::Eq:
+				op = _eq<double>;
+				break;
+			case RelationalOps::Ne:
+				op = _ne<double>;
+				break;
+			case RelationalOps::Lt:
+				op = _lt<double>;
+				break;
+			case RelationalOps::Gt:
+				op = _gt<double>;
+				break;
+			case RelationalOps::Le:
+				op = _le<double>;
+				break;
+			case RelationalOps::Ge:
+				op = _ge<double>;
+				break;
+			default:
+				op = _eq<double>;	// default placeholder, should never happen
+				break;
+		}
+		bool result = op(lvalue, rvalue);
+		this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
+		this->cleanTree = false;
+		this->hasReplacement = true;
+	}
+
+	// relational char stuff	
+	if (n->right->evaluatedType == TypeName::tChar)
+	{
+		char lvalue = dynamic_cast<ConstantCharNode*>(n->left.get())->charValue;
+		char rvalue = dynamic_cast<ConstantCharNode*>(n->right.get())->charValue;
+
+		std::function<bool(char,char)> op;
+		switch (n->op)
+		{
+			case RelationalOps::Eq:
+				op = _eq<char>;
+				break;
+			case RelationalOps::Ne:
+				op = _ne<char>;
+				break;
+			case RelationalOps::Lt:
+				op = _lt<char>;
+				break;
+			case RelationalOps::Gt:
+				op = _gt<char>;
+				break;
+			case RelationalOps::Le:
+				op = _le<char>;
+				break;
+			case RelationalOps::Ge:
+				op = _ge<char>;
+				break;
+			default:
+				op = _eq<char>;	// default placeholder, should never happen
+				break;
+		}
+		bool result = op(lvalue, rvalue);
+		this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
+		this->cleanTree = false;
+		this->hasReplacement = true;
+	}
+
+
+
 	// Support optimizing == and != for bool type	
 	if (n->right->evaluatedType == TypeName::tBool && (n->op == RelationalOps::Eq || n->op == RelationalOps::Ne))
 	{
-		float lvalue = dynamic_cast<BoolNode*>(n->left.get())->boolValue;
-		float rvalue = dynamic_cast<BoolNode*>(n->right.get())->boolValue;
+		float lvalue = dynamic_cast<ConstantBoolNode*>(n->left.get())->boolValue;
+		float rvalue = dynamic_cast<ConstantBoolNode*>(n->right.get())->boolValue;
 
 		std::function<bool(bool,bool)> op;
 		switch (n->op)
@@ -389,7 +498,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 				break;
 		}
 		bool result = op(lvalue, rvalue);
-		this->repl_expr_node = make_node<BoolNode>(n->location, result);
+		this->repl_expr_node = make_node<ConstantBoolNode>(n->location, result);
 		this->cleanTree = false;
 		this->hasReplacement = true;
 	}
@@ -521,7 +630,7 @@ void OptimizeVisitor::visit(AugmentedAssignmentNode* n)
 	}
 }
 
-void OptimizeVisitor::visit(BoolNode* n) 
+void OptimizeVisitor::visit(ConstantBoolNode* n) 
 {
 	// nothing to optimize
 }
@@ -548,6 +657,16 @@ void OptimizeVisitor::visit(ConstantFloatNode* n)
 	// nothing to optimize
 }
 
+void OptimizeVisitor::visit(ConstantCharNode* n)
+{
+	// nothing to do
+}
+
+void OptimizeVisitor::visit(ConstantDoubleNode* n)
+{
+	// nothing to do
+}
+
 void OptimizeVisitor::visit(IfNode* n) 
 {
 	// if the predicate is always false, remove the entire if loop
@@ -565,7 +684,7 @@ void OptimizeVisitor::visit(IfNode* n)
 	if (n->ifExpr->isConstant && n->ifExpr->evaluatedType == TypeName::tBool)
 	{
 		// grab the bool value from the simplified node 
-		bool nvalue = dynamic_cast<BoolNode*>(n->ifExpr.get())->boolValue;
+		bool nvalue = dynamic_cast<ConstantBoolNode*>(n->ifExpr.get())->boolValue;
 		// // replace this node with the appropriate operand
 		// this->repl_expr_node = std::move(nvalue ? n->trueExpr : n->falseExpr);
 		// this->cleanTree = false;
@@ -618,7 +737,7 @@ void OptimizeVisitor::visit(WhileNode* n)
 	// NOTE: this HAS to be a bool because of error checking we did earlier?
 	if (n->whileExpr->isConstant && n->whileExpr->evaluatedType == TypeName::tBool)
 	{
-		bool nvalue = dynamic_cast<BoolNode*>(n->whileExpr.get())->boolValue;
+		bool nvalue = dynamic_cast<ConstantBoolNode*>(n->whileExpr.get())->boolValue;
 		if (!nvalue)
 		{
 			this->removeNode = true;
@@ -684,7 +803,7 @@ void OptimizeVisitor::visit(TernaryNode* n)
 	if (n->condExpr->isConstant && n->condExpr->evaluatedType == TypeName::tBool)
 	{
 		// grab the bool value from the simplified node 
-		bool nvalue = dynamic_cast<BoolNode*>(n->condExpr.get())->boolValue;
+		bool nvalue = dynamic_cast<ConstantBoolNode*>(n->condExpr.get())->boolValue;
 		// replace this node with the appropriate operand
 		this->repl_expr_node = std::move(nvalue ? n->trueExpr : n->falseExpr);
 		this->cleanTree = false;

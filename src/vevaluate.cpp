@@ -287,6 +287,20 @@ void EvaluateVisitor::visit(ConstantIntNode* n)
 	n->isConstant = true;
 }
 
+void EvaluateVisitor::visit(ConstantCharNode* n)
+{
+	// constant char is always type char
+	n->evaluatedType = TypeName::tChar;
+	n->isConstant = true;
+}
+
+void EvaluateVisitor::visit(ConstantDoubleNode* n)
+{
+	// constant double is always type double
+	n->evaluatedType = TypeName::tDouble;
+	n->isConstant = true;
+}
+
 void EvaluateVisitor::visit(AssignmentNode* n) 
 {
 	// do we want to do anything here?
@@ -338,7 +352,7 @@ void EvaluateVisitor::visit(AugmentedAssignmentNode* n)
 	}
 }
 
-void EvaluateVisitor::visit(BoolNode* n) 
+void EvaluateVisitor::visit(ConstantBoolNode* n) 
 {
 	// Constant bool node is always of type bool
 	n->evaluatedType = TypeName::tBool;

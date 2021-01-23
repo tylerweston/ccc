@@ -59,12 +59,14 @@ public:
 	void visit(FuncDefnNode* n) override;
 	void visit(FuncDeclNode* n) override;
 	void visit(FuncCallNode* n) override;
-	void visit(ConstantIntNode* n) override;
 	void visit(AssignmentNode* n) override;
 	void visit(AugmentedAssignmentNode* n) override;
-	void visit(BoolNode* n) override;
 	void visit(ReturnNode* n) override;
+	void visit(ConstantBoolNode* n) override;
+	void visit(ConstantCharNode* n) override;
+	void visit(ConstantDoubleNode* n) override;
 	void visit(ConstantFloatNode* n) override;
+	void visit(ConstantIntNode* n) override;
 	void visit(IfNode* n) override;
 	void visit(ForNode* n) override;
 	void visit(WhileNode* n) override;
@@ -74,7 +76,6 @@ public:
 	void visit(BreakNode* n) override;
 	void visit(ContinueNode* n) override;	
 	void visit(ExpressionStatementNode*) override;
-
 };
 
 #endif // CCC_CODEGEN_HPP_INCLUDED

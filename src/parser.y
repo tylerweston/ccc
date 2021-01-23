@@ -45,8 +45,10 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 
 // value holding tokens
 %token <std::string> TOK_IDENTIFIER
+%token <char> TOK_CHAR
 %token <int> TOK_INTEGER
 %token <float> TOK_FLOAT
+%token <double> TOK_DOUBLE
 %token <TypeName> TOK_TYPE
 
 // bool literal tokens
@@ -73,10 +75,12 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 
 // types
 %token TOK_TYPE_INT TOK_TYPE_FLOAT TOK_TYPE_BOOL TOK_TYPE_VOID
+%token TOK_TYPE_CHAR TOK_TYPE_DOUBLE
 
 // symbols
 %token TOK_LPAREN TOK_RPAREN
 %token TOK_LBRACE TOK_RBRACE
+%token TOK_SINGLE_QUOTE
 
 
 %token TOK_COMMA TOK_SEMICOLON 
@@ -86,7 +90,6 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 %left HI_PREC
 
 // Easier way to do this?
-// TODO: These should end up being more specified
 
 %type <std::unique_ptr<Node>> root
 
@@ -258,13 +261,17 @@ single_statement
 
 expression
 	: TOK_TRUE 
-		{ $$ = make_node<BoolNode>(@$, true); }
+		{ $$ = make_node<ConstantBoolNode>(@$, true); }
 	| TOK_FALSE 
-		{ $$ = make_node<BoolNode>(@$, false); }
+		{ $$ = make_node<ConstantBoolNode>(@$, false); }
 	| TOK_INTEGER 							
 		{ $$ = make_node<ConstantIntNode>(@$, $1); }
 	| TOK_FLOAT 							
 		{ $$ = make_node<ConstantFloatNode>(@$, $1); }
+	| TOK_CHAR
+		{ $$ = make_node<ConstantCharNode>(@$, $1); }
+	| TOK_DOUBLE
+		{ $$ = make_node<ConstantDoubleNode>(@$, $1); }
 	| name									
 		{ $$ = make_node<VariableNode>(@$, $1); }
 	| ternary_expression

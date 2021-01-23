@@ -61,6 +61,9 @@ REGEX_FLOAT {REGEX_FLOAT1}|{REGEX_FLOAT2}|{REGEX_FLOAT3}
 
 REGEX_INTEGER {DIGIT}+
 
+/* which one of these ?! */
+REGEX_CHAR (\'(\\[abefnrtv0\\\'\"\?]|[a-zA-Z0-9])\')
+
 %%
 
 "\n" { SET_COLUMN(1); }
@@ -77,6 +80,8 @@ int { GEN_TOK(TOK_TYPE, TypeName::tInt); }
 float { GEN_TOK(TOK_TYPE, TypeName::tFloat); }
 bool { GEN_TOK(TOK_TYPE, TypeName::tBool); }
 void { GEN_TOK(TOK_TYPE, TypeName::tVoid); }
+char { GEN_TOK(TOK_TYPE, TypeName::tChar); }
+double { GEN_TOK(TOK_TYPE, TypeName::tDouble); }
 
 true { GEN_TOK(TOK_TRUE); }
 false { GEN_TOK(TOK_FALSE); }
@@ -115,6 +120,8 @@ false { GEN_TOK(TOK_FALSE); }
 ":" { GEN_TOK(TOK_COLON); }
 "\?" { GEN_TOK(TOK_QUESTION_MARK); }
 "=" { GEN_TOK(TOK_ASSIGN); }
+
+{REGEX_CHAR} { GEN_TOK(TOK_CHAR, yytext[1]);}	/* need extract char function here */
 
 . { printf("[error] invalid token.\n"); return TOK(YYUNDEF, GET_COLUMN()); }
 

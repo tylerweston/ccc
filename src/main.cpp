@@ -27,16 +27,17 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	// show our lexing if we get the lexing flag
-	if (cmds.lexflag)
-	{
-		lex(cmds.filename);
-	}
-
 	// preprocessing
 	std::cout << "Preprocessing file " << cmds.filename << "\n";
 	preprocess* pp = new preprocess();
 	pp->preprocess_file(cmds.filename, cmds.filename + ".pp"s);
+
+	// show our lexing if we get the lexing flag
+	if (cmds.lexflag)
+	{
+		lex(cmds.filename + ".pp"s);
+	}
+
 
 	// parsing
 	std::cout << "Parsing file " << cmds.filename << ".pp\n";

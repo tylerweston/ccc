@@ -94,6 +94,8 @@ void CodegenVisitor::visit(BinaryOpNode* n)
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
 
+	// need to implement this for char and double
+
 	// Either perform floating point or int math depending on the type of this node
 	if (n->evaluatedType == TypeName::tFloat)
 	{
@@ -128,6 +130,8 @@ void CodegenVisitor::visit(RelationalOpNode* n)
 	llvm::Value* lval = this->consumeRetValue();
 	n->right->accept(this);
 	llvm::Value* rval = this->consumeRetValue();
+
+	// todo: need to implement this for char and double!
 
 	// We only have to check the left nodes evaluated type since, due to semantic checking, left and right
 	// are guaranteed to have matching types by the time we get here
@@ -316,11 +320,16 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 	this->compilationUnit->builder.CreateStore(this->consumeRetValue(), lloc);
 }
 
-void CodegenVisitor::visit(BoolNode* n) 
+void CodegenVisitor::visit(ConstantBoolNode* n) 
 {
 	// Generate a constant boolean value, represented as a 1 bit integer in llvm
 	const unsigned int v = n->boolValue ? 1 : 0;
 	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt1Ty(*(this->compilationUnit->context.get())), v));
+}
+
+void CodegenVisitor::visit(ConstantCharNode* n)
+{
+	this->setRetValue(llvm::ConstantInt::get(llvm::Type::getInt8Ty(*(this->compilationUnit->context.get())), n->charValue));
 }
 
 void CodegenVisitor::visit(ReturnNode* n) 
@@ -344,6 +353,11 @@ void CodegenVisitor::visit(ConstantFloatNode* n)
 {
 	// Set retValue to be a constant floating point number
 	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getFloatTy(*(this->compilationUnit->context.get())), n->floatValue));// do we need true/false here?
+}
+
+void CodegenVisitor::visit(ConstantDoubleNode* n)
+{
+	this->setRetValue(llvm::ConstantFP::get(llvm::Type::getDoubleTy(*(this->compilationUnit->context.get())), n->doubleValue));// do we need true/false here?
 }
 
 void CodegenVisitor::visit(IfNode* n) 
@@ -767,8 +781,12 @@ llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
 			return this->compilationUnit->builder.getInt32Ty();
 		case TypeName::tFloat:
 			return this->compilationUnit->builder.getFloatTy();
+		case TypeName::tDouble:
+			return this->compilationUnit->builder.getDoubleTy();
 		case TypeName::tBool:
 			return this->compilationUnit->builder.getInt1Ty();
+		case TypeName::tChar:
+			return this->compilationUnit->builder.getInt8Ty();
 		default:
 			llvm_unreachable("Invalid type");
 			return nullptr;

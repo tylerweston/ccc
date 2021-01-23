@@ -22,8 +22,9 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
-#include "llvm/ExecutionEngine/Orc/LLJIT.h"
-#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
+// unused
+// #include "llvm/ExecutionEngine/Orc/LLJIT.h"
+// #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 
 // Standard Libraries.
 // TODO: Change printfs to std::couts
@@ -31,9 +32,9 @@
 #include <cassert>
 #include <cstring>
 
-int lex(char const* path) 
+int lex(const std::string& path) 
 {
-	FILE* in = fopen(path, "r");
+	FILE* in = fopen(path.c_str(), "r");
 	if (in == nullptr) {
 		printf("[error] unable to open file: %s\n", std::strerror(errno));
 		return 1;
@@ -49,7 +50,14 @@ int lex(char const* path)
 		int x = yylex(&s, nullptr, lexer);
 		assert(x == 1);
 		printf("[output] lexer got symbol: %s (%d, %d).\n", s.name(), s.location.begin.line, s.location.begin.column);
-		if (s.kind() == yy::parser::symbol_kind_type::S_YYEOF) {
+		// TODO: figure out cleaner way to print lexer output
+		// printf ("%s ", s.name());
+		// if (s.kind() == yy::parser::symbol_kind_type::S_YYEMPTY)
+		// {
+		// 	printf("\n");
+		// }
+		if (s.kind() == yy::parser::symbol_kind_type::S_YYEOF) 
+		{
 			break;
 		}
 	}
@@ -60,7 +68,7 @@ int lex(char const* path)
 	return 0;
 }
 
-int parse(const std::string path, std::unique_ptr<Node>& root) 
+int parse(const std::string& path, std::unique_ptr<Node>& root) 
 {
 	FILE* in = fopen(path.c_str(), "r");
 	if (in == nullptr) {
