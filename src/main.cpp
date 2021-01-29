@@ -17,7 +17,11 @@ static void usage();
 int main(int argc, char** argv) {
 	std::cout << "cimple c compiler - Tyler Weston - 2020\n";
  	cmd_line_args cmds;
-	parse_commands(argc, argv, &cmds);
+	if (parse_commands(argc, argv, &cmds) != 0)
+	{
+		usage();
+		exit(1);
+	}
 	// make sure we got a file
 	if (!cmds.filename)
 	{
@@ -118,7 +122,7 @@ int parse_commands(int argc, char** argv, cmd_line_args* cmds)
 				// display lexing information
 				cmds->lexflag = 1;
 				break;
-			case 'n':
+			case 'o':
 				try 
 				{
 					cmds->optlevel = std::stoi(optarg);
@@ -132,14 +136,15 @@ int parse_commands(int argc, char** argv, cmd_line_args* cmds)
 				// todo: fix this up
 				if (optopt == 'o')
 				{
-					std::cerr << "Option -" << optopt << " requires an argument\n";
+					std::cerr << "Option -" << (char) optopt << " requires an argument\n";
 				}
 				else
 				{
-					std::cerr << "Unknown option " << optopt << "\n";
+					std::cerr << "Unknown option -" << (char) optopt << "\n";
 				}
 				return 1;
 			default:
+				usage();
 				exit(1);
 		}
 	}
