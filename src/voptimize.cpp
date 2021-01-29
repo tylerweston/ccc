@@ -366,7 +366,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 		this->hasReplacement = true;
 	}
 	// relational float stuff	
-	if (n->right->evaluatedType == TypeName::tFloat)
+	if (n->left->evaluatedType == TypeName::tFloat)
 	{
 		float lvalue = dynamic_cast<ConstantFloatNode*>(n->left.get())->floatValue;
 		float rvalue = dynamic_cast<ConstantFloatNode*>(n->right.get())->floatValue;
@@ -403,7 +403,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 	}
 
 	// relational double stuff	
-	if (n->right->evaluatedType == TypeName::tDouble)
+	if (n->left->evaluatedType == TypeName::tDouble)
 	{
 		double lvalue = dynamic_cast<ConstantDoubleNode*>(n->left.get())->doubleValue;
 		double rvalue = dynamic_cast<ConstantDoubleNode*>(n->right.get())->doubleValue;
@@ -440,7 +440,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 	}
 
 	// relational char stuff	
-	if (n->right->evaluatedType == TypeName::tChar)
+	if (n->left->evaluatedType == TypeName::tChar)
 	{
 		char lvalue = dynamic_cast<ConstantCharNode*>(n->left.get())->charValue;
 		char rvalue = dynamic_cast<ConstantCharNode*>(n->right.get())->charValue;

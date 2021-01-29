@@ -182,7 +182,37 @@ void PrintVisitor::visit(ConstantIntNode* n)
 void PrintVisitor::visit(ConstantCharNode* n) 
 {
 	this->indent();
-	std::cout << "Char (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << n->charValue << " }\n";
+	std::cout << "Char (" << n->location.begin.line << ", " << n->location.begin.column << ") { ";
+	switch(n->charValue)
+	{
+			case '\a':
+				std::cout << '\\' << 'a';
+				break;
+			case '\b':
+				std::cout << '\\' << 'b';
+				break;
+			case '\f':
+				std::cout << '\\' << 'f';
+				break;
+			case '\n':
+				std::cout << '\\' << 'n';
+				break;
+			case '\r':
+				std::cout << '\\' << 'r';
+				break;
+			case '\t':
+				std::cout << '\\' << 't';
+				break;
+			case '\v':
+				std::cout << '\\' << 'v';
+				break;
+			case '\0':
+				std::cout << '\\' << '0';
+				break;
+			default:
+				std::cout << n->charValue;
+	} 
+	std::cout << " }\n";
 }
 
 void PrintVisitor::visit(ConstantDoubleNode* n) 

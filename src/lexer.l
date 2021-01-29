@@ -27,6 +27,47 @@ do { \
 
 static int make_symbol(YYSTYPE*, YYSTYPE);
 
+// TODO: How can we use 
+char get_char_from_yytext(std::string yystring)
+{
+	// char is either of form '\*' or '*' where * is an arbitrary-ish char
+	if (yystring[1] == '\\')
+	{
+		if (yystring.length()==3)
+		{
+			//todo: throw a better error here
+			printf("Error! Cannot parse char\n");
+			exit(1);
+		}
+		switch(yystring[2])
+		{
+			case 'a':
+				return '\a';
+			case 'b':
+				return '\b';
+			case 'f':
+				return '\f';
+			case 'n':
+				return '\n';
+			case 'r':
+				return '\r';
+			case 't':
+				return '\t';
+			case 'v':
+				return '\v';
+			case '0':
+				return '\0';
+			default:
+				printf("Error! Bad escape character\n");
+				exit(1);
+		}
+	}
+	else
+	{
+		return yystring[1];
+	}
+}
+
 %}
 
 /* see https://westes.github.io/flex/manual/Scanner-Options.html */
@@ -62,7 +103,7 @@ REGEX_FLOAT {REGEX_FLOAT1}|{REGEX_FLOAT2}|{REGEX_FLOAT3}
 REGEX_INTEGER {DIGIT}+
 
 /* which one of these ?! */
-REGEX_CHAR (\'(\\[abefnrtv0\\\'\"\?]|[a-zA-Z0-9])\')
+REGEX_CHAR (\'(\\[abfnrtv0\\\'\"\?]|[a-zA-Z0-9])\')
 
 %%
 
@@ -121,7 +162,7 @@ false { GEN_TOK(TOK_FALSE); }
 "\?" { GEN_TOK(TOK_QUESTION_MARK); }
 "=" { GEN_TOK(TOK_ASSIGN); }
 
-{REGEX_CHAR} { GEN_TOK(TOK_CHAR, yytext[1]);}	/* need extract char function here */
+{REGEX_CHAR} { GEN_TOK(TOK_CHAR, get_char_from_yytext(yytext));}	/* need extract char function here */
 
 . { printf("[error] invalid token.\n"); return TOK(YYUNDEF, GET_COLUMN()); }
 

@@ -247,7 +247,7 @@ single_statement
 		{ $$ = make_node<AssignmentNode>(@$, $1, $3); }
 	| name augmented_assign expression 
 		{ $$ = make_node<AugmentedAssignmentNode>(@$, $2, $1, $3); }
-	| TOK_BREAK 
+	| TOK_DOUBLE 
 		{ $$ = make_node<BreakNode>(@$); }
 	| TOK_CONTINUE 
 		{ $$ = make_node<ContinueNode>(@$); }
