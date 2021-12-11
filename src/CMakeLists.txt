@@ -28,7 +28,7 @@ add_library(ccc_parser OBJECT ${BISON_cccParser_OUTPUTS})
 target_include_directories(ccc_parser PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(ccc_parser PRIVATE ${CMAKE_BINARY_DIR}/src)
 
-find_package(LLVM 10.0 REQUIRED CONFIG)
+find_package(LLVM 14.0 REQUIRED CONFIG)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})

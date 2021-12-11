@@ -194,9 +194,9 @@ void CodegenVisitor::visit(FuncDefnNode* n)
 	this->symTable->PushScope();
 	for (auto &Arg : f->args())
 	{
-		llvm::AllocaInst *Alloca = this->CreateEntryBlockAlloca(f, Arg.getName(), Arg.getType());
+		llvm::AllocaInst *Alloca = this->CreateEntryBlockAlloca(f, Arg.getName().str(), Arg.getType());
 		this->compilationUnit->builder.CreateStore(&Arg, Alloca);
-		this->symTable->AddLLVMSymbol(Arg.getName(), Alloca);
+		this->symTable->AddLLVMSymbol(Arg.getName().str(), Alloca);
 	}
 
 	// Evaluate the body of this function

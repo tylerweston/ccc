@@ -186,7 +186,7 @@ bool CompilationUnit::process(Node* root)
 std::error_code CompilationUnit::dump(std::string path, int print_ir) 
 {
 	std::error_code ec;
-	llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OpenFlags::F_None);
+	llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OpenFlags::OF_None);
 	this->module->print(out, nullptr);
 	if (print_ir)
 	{
