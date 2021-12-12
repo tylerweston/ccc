@@ -35,13 +35,4 @@ public:
 	std::unique_ptr<llvm::Module> module;
 };
 
-struct cmd_line_args
-{
-	int printflag;
-	int lexflag;
-	int printir;
-	int optlevel;
-	char* filename;
-};
-
 #endif // CCC_COMPILER_HPP_INCLUDED

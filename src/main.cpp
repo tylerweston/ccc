@@ -7,6 +7,7 @@
 #include "compiler.hpp"
 #include "nodes.hpp"
 #include "preprocess.hpp"
+#include "main.hpp"
 #include <string>
 #include <unistd.h>
 
@@ -79,7 +80,8 @@ int main(int argc, char** argv) {
 	u->dump(cmds.filename + ".ll"s, cmds.printir);	// this will be the generated code
 
 	// any cleanup happens here
-	pp->clean_preprocess_file(cmds.filename + ".pp"s);
+	if (!cmds.keep_pp)
+		pp->clean_preprocess_file(cmds.filename + ".pp"s);
 
 	std::cout << "All done!\n";
 	return 0;
@@ -88,11 +90,13 @@ int main(int argc, char** argv) {
 int parse_commands(int argc, char** argv, cmd_line_args* cmds)
 {
 	// init with defaults here
-	cmds->printflag = 0;
-	cmds->printir = 0;
-	cmds->lexflag = 0;
-	cmds->optlevel = 1;
-	cmds->filename = NULL;
+	// cmds->printflag = 0;
+	// cmds->printir = 0;
+	// cmds->lexflag = 0;
+	// cmds->keep_pp = 0;
+	// cmds->optlevel = 1;
+	// cmds->filename = NULL;
+
 	int index;
 	int optcode;
 
@@ -104,7 +108,7 @@ int parse_commands(int argc, char** argv, cmd_line_args* cmds)
 		exit(0);
 	}
 
-	while ((optcode = getopt (argc, argv, "ialo:")) != -1)
+	while ((optcode = getopt (argc, argv, "eialo:")) != -1)
 	{
 		switch (optcode)
 		{
@@ -118,6 +122,10 @@ int parse_commands(int argc, char** argv, cmd_line_args* cmds)
 			case 'l':
 				// display lexing information
 				cmds->lexflag = 1;
+				break;
+			case 'e':
+				// don't erase preprocessed file
+				cmds->keep_pp = 1;
 				break;
 			case 'n':
 				try 
@@ -160,5 +168,6 @@ static void usage()
 				<< " -o1	: Basic optimizations (default)\n"
 				<< " -l 	: Display lexer output\n"
 				<< " -a 	: Display AST\n"
-				<< " -i 	: Display generated IR\n";
+				<< " -i 	: Display generated IR\n"
+				<< " -e     : Keep preprocessed file (as filename.pp)\n";
 }

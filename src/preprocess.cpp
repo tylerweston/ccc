@@ -3,19 +3,13 @@
 #include <fstream>
 #include <string>
 
+// private preprocessing functions
+int clean_comments(std::ifstream& readfile, std::ofstream& writefile);
+
 int preprocess::clean_preprocess_file(const std::string infile)
 {
-	// first, make sure infile exists
-	std::ifstream in(infile);
-	if (!in.good())
-	{
-		std::cerr << "Error: " << infile << " does not exist." << std::endl;
-		return -1;
-	}
-	// otherwise, delete infile
-	in.close();
-	std::remove(infile.c_str());
-	return 0;
+	// remove infile and return whether it was successful
+	return std::remove(infile.c_str());
 }
 
 int preprocess::preprocess_file(const std::string infile, const std::string outfile)
@@ -37,12 +31,31 @@ int preprocess::preprocess_file(const std::string infile, const std::string outf
 		return 1;
 	}
 
-	// once we get here, both our files are open
+	// here that each transform the file a little bit.
+	// Remove comments
+	// Remove newlines
+	// predefined macros
+	// Include header files ie. #include <system headers> or #include "local headers"
+	// user defined macros
+	clean_comments(readfile, writefile);
+	return 0;
+}
+
+int clean_comments(std::ifstream& readfile, std::ofstream& writefile)
+{
+	// Remove single and multiline comments from a file
+	
 	std::string inputLine;
 	std::string outputLine;
 
-	// first thing we'll do is remove comments
-	// TODO: move each preprocessing pass to a different function
+	// simple state machine to track the comment state
+	enum class preprocess_state
+	{
+		normal = 0,
+		normal_seen_slash,
+		in_block_comment,
+		in_block_comment_seen_star
+	};
 	preprocess_state cur_state = preprocess_state::normal;
 	bool breakCommentFlag = false;
 
