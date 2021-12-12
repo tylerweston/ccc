@@ -3,6 +3,21 @@
 #include <fstream>
 #include <string>
 
+int preprocess::clean_preprocess_file(const std::string infile)
+{
+	// first, make sure infile exists
+	std::ifstream in(infile);
+	if (!in.good())
+	{
+		std::cerr << "Error: " << infile << " does not exist." << std::endl;
+		return -1;
+	}
+	// otherwise, delete infile
+	in.close();
+	std::remove(infile.c_str());
+	return 0;
+}
+
 int preprocess::preprocess_file(const std::string infile, const std::string outfile)
 {
 	// try to open read file

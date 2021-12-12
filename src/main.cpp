@@ -1,5 +1,5 @@
 /*
- * ccc - based on lab work for UofT course compilers & interpreters 
+ * ccc - based on lab work & project for UofT course compilers & interpreters 
  * By: Tyler Weston
  * testing suites written by Stephen Keith
  */
@@ -21,14 +21,12 @@ int main(int argc, char** argv) {
 	// make sure we got a file
 	if (!cmds.filename)
 	{
-		// TODO: make this make more sense
-		// printf("Must supply filename\n");
 		std::cout << "Must supply filename to compile\n";
 		return 1;
 	}
 
 	// preprocessing
-	std::cout << "Preprocessing file " << cmds.filename << "\n";
+	std::cout << "Preprocessing file. " << cmds.filename << " -> " << cmds.filename << ".pp\n";
 	preprocess* pp = new preprocess();
 	pp->preprocess_file(cmds.filename, cmds.filename + ".pp"s);
 
@@ -79,6 +77,9 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	u->dump(cmds.filename + ".ll"s, cmds.printir);	// this will be the generated code
+
+	// any cleanup happens here
+	pp->clean_preprocess_file(cmds.filename + ".pp"s);
 
 	std::cout << "All done!\n";
 	return 0;
