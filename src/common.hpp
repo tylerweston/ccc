@@ -97,7 +97,9 @@ enum class TypeName
 	tFloat,
 	tBool,
 	tChar,
-	tDouble
+	tDouble,
+	tShort,
+	tLong
 };
 std::string TypeNameString(TypeName t);
 

@@ -2,87 +2,71 @@
 	common.cpp
 */
 #include "common.hpp"
+#include <map>
+#include <string>
 
 std::string TypeNameString(TypeName t)
 {
-	switch(t) 
-	{
-		case TypeName::tVoid:
-			return "void";
-		case TypeName::tInt:
-			return "int";
-		case TypeName::tFloat:
-			return "float";
-		case TypeName::tBool:
-			return "bool";
-		case TypeName::tChar:
-			return "char";
-		case TypeName::tDouble:
-			return "double";
-		default:
-			return "undefined";
-	}
+	std::map<TypeName, std::string> TypeNameStringTable = {
+		{TypeName::tVoid, 	"void"},
+		{TypeName::tBool, 	"bool"},
+		{TypeName::tChar, 	"char"},
+		{TypeName::tInt, 	"int"},
+		{TypeName::tFloat, 	"float"},
+		{TypeName::tDouble, "double"},
+		{TypeName::tShort, 	"short"},
+		{TypeName::tLong, 	"long"},
+	};
+	if (TypeNameStringTable.find(t) == TypeNameStringTable.end())
+		return "undefined type";
+	return TypeNameStringTable[t];
 }
 
 
 
 std::string BinaryOpString(BinaryOps b)
 {
-	switch(b) 
-	{
-		case BinaryOps::Plus:
-			return "+";
-		case BinaryOps::Minus:
-			return "-";
-		case BinaryOps::Star:
-			return "*";
-		case BinaryOps::Slash:
-			return "/";
-		case BinaryOps::LogAnd:
-			return "&&";
-		case BinaryOps::LogOr:
-			return "||";
-		default:
-			return "undefined";
-	}
+	std::map<BinaryOps, std::string> BinaryOpStringTable = {
+		{BinaryOps::Plus, 		"+"},
+		{BinaryOps::Minus, 		"-"},
+		{BinaryOps::Star, 		"*"},
+		{BinaryOps::Slash, 		"/"},
+		// {BinaryOps::Mod, 		"%"},
+		{BinaryOps::LogAnd, 	"&&"},
+		{BinaryOps::LogOr, 		"||"},
+	};
+	if (BinaryOpStringTable.find(b) == BinaryOpStringTable.end())
+		return "undefined binary operator";
+	return BinaryOpStringTable[b];
 }
 
 
 
 std::string RelationalOpsString(RelationalOps r)
 {
-	switch(r) 
-	{
-		case RelationalOps::Eq:
-			return "==";
-		case RelationalOps::Ne:
-			return "!=";
-		case RelationalOps::Lt:
-			return "<";
-		case RelationalOps::Gt:
-			return ">";
-		case RelationalOps::Le:
-			return "<=";
-		case RelationalOps::Ge:
-			return ">=";
-		default:
-			return "undefined";
-	}
+	std::map<RelationalOps, std::string> RelationalOpsStringTable = {
+		{RelationalOps::Eq, 		"=="},
+		{RelationalOps::Ne, 		"!="},
+		{RelationalOps::Lt, 		"<"},
+		{RelationalOps::Le, 		"<="},
+		{RelationalOps::Gt, 		">"},
+		{RelationalOps::Ge, 		">="},
+	};
+	if (RelationalOpsStringTable.find(r) == RelationalOpsStringTable.end())
+		return "undefined relational operator";
+	return RelationalOpsStringTable[r];
 }
 
 std::string AugmentedAssignOpsString(AugmentedAssignOps a)
 {
-	switch(a) 
-	{
-		case AugmentedAssignOps::PlusEq:
-			return "+=";
-		case AugmentedAssignOps::MinusEq:
-			return "-=";
-		case AugmentedAssignOps::StarEq:
-			return "*=";
-		case AugmentedAssignOps::SlashEq:
-			return "/=";
-		default:
-			return "undefined";
-	}
+	std::map<AugmentedAssignOps, std::string> AugmentedAssignOpsStringTable = {
+		{AugmentedAssignOps::PlusEq, 		"+="},
+		{AugmentedAssignOps::MinusEq, 		"-="},
+		{AugmentedAssignOps::StarEq, 		"*="},
+		{AugmentedAssignOps::SlashEq, 		"/="},
+
+	};
+	if (AugmentedAssignOpsStringTable.find(a) == AugmentedAssignOpsStringTable.end())
+		return "undefined augmented assign operator";
+	return AugmentedAssignOpsStringTable[a];
 }
