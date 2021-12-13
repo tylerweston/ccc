@@ -495,6 +495,8 @@ void EvaluateVisitor::visit(TernaryNode* n)
 
 void EvaluateVisitor::visit(CastExpressionNode* n) 
 {
+	// TODO: should be able to cast between a bunch of different types!
+	// You can cast between int, float, bool, char, short, long, etc.
 	if (!(n->t == TypeName::tInt || n->t == TypeName::tFloat))
 	{
 		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): Can only cast between float and integer\n";
@@ -526,4 +528,14 @@ void EvaluateVisitor::visit(ContinueNode* n)
 {
 	// hmmm? Here we would probably link to whatever statement
 	// we are in.
-}	
+}
+
+bool checkTypeCompatability(TypeName t1, TypeName t2)
+{
+	// if they are the same type, we're good
+	if (t1 == t2)
+	{
+		return true;
+	}
+	// 
+}

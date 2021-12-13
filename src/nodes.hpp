@@ -84,7 +84,8 @@ class DeclarationNode : public StatementNode
 public:
 	std::string name;
 	TypeName t;
-	DeclarationNode(TypeName t, std::string name);
+	bool isConstant;
+	DeclarationNode(TypeName t, std::string name, bool isConstant);
 	virtual void accept(NodeVisitor* v) override;
 };
 

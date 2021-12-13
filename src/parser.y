@@ -49,6 +49,8 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 %token <int> TOK_INTEGER
 %token <float> TOK_FLOAT
 %token <double> TOK_DOUBLE
+%token <short> TOK_SHORT
+%token <long> TOK_LONG
 %token <TypeName> TOK_TYPE
 
 // bool literal tokens
@@ -72,10 +74,11 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 
 // keywords
 %token TOK_IF TOK_WHILE TOK_FOR TOK_BREAK TOK_CONTINUE TOK_RETURN
+%token TOK_CONST
 
 // types
 %token TOK_TYPE_INT TOK_TYPE_FLOAT TOK_TYPE_BOOL TOK_TYPE_VOID
-%token TOK_TYPE_CHAR TOK_TYPE_DOUBLE
+%token TOK_TYPE_CHAR TOK_TYPE_DOUBLE TOK_TYPE_SHORT TOK_TYPE_LONG
 
 // symbols
 %token TOK_LPAREN TOK_RPAREN
@@ -230,7 +233,9 @@ suite
 
 declaration
 	: type name 
-		{ $$ = make_node<DeclarationNode>(@$, $1, $2); }
+		{ $$ = make_node<DeclarationNode>(@$, $1, $2, false); }
+	| TOK_CONST type name
+		{ $$ = make_node<DeclarationNode>(@$, $2, $3, true); }
 	;
 
 statement

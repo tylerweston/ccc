@@ -11,6 +11,60 @@
 #include <string>
 #include <unistd.h>
 
+/* TODO:
+Don't need or implement later:
+auto		- don't bother, auto is useless
+volatile	- declare memory may change even if it looks like it won't.
+inline		- once macros are implemented, use a similar strategy? Prog. will function same whether function is inlined or not.
+register	- store variable in a register instead of on the stack.
+restrict	- used with pointers, for optimization stuff, lets compiler know that pointer is the only way to access that memory location.
+extern		- declare something without defining it or allocing memory for it. 
+
+Difficult? 
+sizeof(type)		- return size of type
+struct
+typedef
+union
+
+Switch keywords:
+switch
+case
+default
+
+Type keywords:
+long
+short
+static
+unsigned
+signed
+
+Control flow keywords:
+do
+else
+enum
+goto
+
+const		- for optimizations, declare that variable is constant. ie, once it has been defined, we can replace all instances of it with the value.
+
+% operator
+Bitwise operators:
+^ xor operator
+& and operator
+| or operator
+~ bitwise not operator
+<< left shift
+>> right shift
+
+What other operators are there?
+
+- bool isn't really part of the C language? remove support?
+- built in true and false support?
+- finalize double support, right now it is getting confused with floats
+- This will probably mean there needs to be a way to promote and demote types
+- 
+*/
+
+
 using namespace std::string_literals;
 int parse_commands(int, char**, cmd_line_args*);
 static void usage();

@@ -116,6 +116,7 @@ for { GEN_TOK(TOK_FOR); }
 break { GEN_TOK(TOK_BREAK); }
 continue { GEN_TOK(TOK_CONTINUE); }
 return { GEN_TOK(TOK_RETURN); }
+const { GEN_TOK(TOK_CONST); }
 
 int { GEN_TOK(TOK_TYPE, TypeName::tInt); }
 float { GEN_TOK(TOK_TYPE, TypeName::tFloat); }
@@ -123,6 +124,8 @@ bool { GEN_TOK(TOK_TYPE, TypeName::tBool); }
 void { GEN_TOK(TOK_TYPE, TypeName::tVoid); }
 char { GEN_TOK(TOK_TYPE, TypeName::tChar); }
 double { GEN_TOK(TOK_TYPE, TypeName::tDouble); }
+short { GEN_TOK(TOK_TYPE, TypeName::tShort); }
+long { GEN_TOK(TOK_TYPE, TypeName::tLong); }
 
 true { GEN_TOK(TOK_TRUE); }
 false { GEN_TOK(TOK_FALSE); }

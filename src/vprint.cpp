@@ -18,10 +18,16 @@ void PrintVisitor::visit(DeclarationNode* n)
 	this->indent();
 	std::cout << "Declaration (" << n->location.begin.line << ", " << n->location.begin.column << ") {\n"; 
 	this->indent_level++;
+	if (n->isConstant)
+	{
+		this->indent();
+		std::cout << "Constant\n";
+	}
 	this->indent();
 	std::cout << "Type: " << TypeNameString(n->t) << "\n"; 
 	this->indent();
 	std::cout << "Name: "<< n->name << "\n";
+
 	this->indent_level--;
 	this->indent();
 	std::cout << "}\n";

@@ -83,10 +83,11 @@ FuncCallNode::FuncCallNode(std::string name, std::vector<std::unique_ptr<Express
 }
 void FuncCallNode::accept(NodeVisitor* v) { v->visit(this); }
 
-DeclarationNode::DeclarationNode(TypeName t, std::string name)
+DeclarationNode::DeclarationNode(TypeName t, std::string name, bool isConstant)
 {
   this->t = t;
   this->name = std::move(name); 
+  this->isConstant = isConstant;
 }
 void DeclarationNode::accept(NodeVisitor* v) { v->visit(this); }
 
