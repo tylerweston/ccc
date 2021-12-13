@@ -1,6 +1,6 @@
 #!/bin/csh
 foreach f ( ./tests/* )
-    valgrind ./build/src/ece467c 3 $f
+    valgrind ./src/ccc 3 $f
     echo $f
     cat $f
     set input = "$<"
