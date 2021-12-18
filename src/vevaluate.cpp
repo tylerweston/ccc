@@ -532,10 +532,13 @@ void EvaluateVisitor::visit(ContinueNode* n)
 
 bool checkTypeCompatability(TypeName t1, TypeName t2)
 {
-	// if they are the same type, we're good
+	// ok, but can't we pretty much treat any type as any other type?
+	// NO! ie. struct to int NO GOOD. But what about with base classes?
+	// what does the standard say about this?
+	// if they are the same type, we're def. good
 	if (t1 == t2)
 	{
 		return true;
 	}
-	// 
+	return false; 
 }

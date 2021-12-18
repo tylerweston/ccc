@@ -18,6 +18,7 @@ volatile	- declare memory may change even if it looks like it won't.
 inline		- once macros are implemented, use a similar strategy? Prog. will function same whether function is inlined or not.
 register	- store variable in a register instead of on the stack.
 restrict	- used with pointers, for optimization stuff, lets compiler know that pointer is the only way to access that memory location.
+
 extern		- declare something without defining it or allocing memory for it. 
 
 Difficult? 
@@ -54,6 +55,7 @@ Bitwise operators:
 ~ bitwise not operator
 << left shift
 >> right shift
+, evalute multiple expressions and return value of last one
 
 What other operators are there?
 

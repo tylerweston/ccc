@@ -58,7 +58,7 @@ void CodegenVisitor::visit(VariableNode* n)
 		exit(1);
 	}
 	// Load the value expected from that location and return int
-	llvm::Value* r = this->compilationUnit->builder.CreateLoad(val->getType(), val, n->name);
+	llvm::Value* r = this->compilationUnit->builder.CreateLoad(val, n->name);
 	this->setRetValue(r);
 }
 
@@ -299,7 +299,8 @@ void CodegenVisitor::visit(AugmentedAssignmentNode* n)
 		std::cout << "Error: Can't find variable named " << n->name << "\n";
 		exit(1);
 	}
-	llvm::Value* lval = this->compilationUnit->builder.CreateLoad(lloc->getType(), lloc, n->name);
+
+	llvm::Value* lval = this->compilationUnit->builder.CreateLoad(lloc, n->name);
 
 
 	// then evalute the rhs

@@ -19,5 +19,7 @@ Makefile
 /src/cmake_install.cmake
 test.c
 test.c.ll
-test.c.pp
 parser.output
+*.pp
+*.ll
+*.code-workspace

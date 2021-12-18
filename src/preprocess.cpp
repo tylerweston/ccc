@@ -5,6 +5,8 @@
 
 // private preprocessing functions
 int clean_comments(std::ifstream& readfile, std::ofstream& writefile);
+int check_valid_character(char c);
+int check_all_valid_characters(std::ifstream& readfile);
 
 int preprocess::clean_preprocess_file(const std::string infile)
 {
@@ -32,13 +34,61 @@ int preprocess::preprocess_file(const std::string infile, const std::string outf
 	}
 
 	// here that each transform the file a little bit.
+	// check for valid characters
 	// Remove comments
 	// Remove newlines
 	// predefined macros
 	// Include header files ie. #include <system headers> or #include "local headers"
 	// user defined macros
+	check_all_valid_characters(readfile);
+	readfile.clear();                 // clear fail and eof bits
+	readfile.seekg(0, std::ios::beg); // back to the start!
 	clean_comments(readfile, writefile);
 	return 0;
+}
+
+int check_valid_character(char c)
+{
+	// check if the character is valid
+	// valid characters are:
+	// a-z, A-Z, 0-9, _, $, #, @, %, ^, &, *, (, ), -, +, =, [, ], {, }, <, >, ., ;, :, ?, !, ', ", \, /
+	// and space
+	if (c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\v' || c == '\f')
+	{
+		return 1;
+	}
+	if (c >= 'a' && c <= 'z')
+	{
+		return 1;
+	}
+	if (c >= 'A' && c <= 'Z')
+	{
+		return 1;
+	}
+	if (c >= '0' && c <= '9')
+	{
+		return 1;
+	}
+	if (c == '_' || c == '$' || c == '#' || c == '@' || c == '%' || c == '^' || c == '&' || c == '*' || c == '(' || c == ')' || c == '-' || c == '+' || c == '=' || c == '[' || c == ']' || c == '{' || c == '}' || c == '<' || c == '>' || c == '.' || c == ';' || c == ':' || c == '?' || c == '!' || c == '\'' || c == '\"' || c == '\\' || c == '/')
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int check_all_valid_characters(std::ifstream& readfile)
+{
+	// check if all characters are valid
+	char c;
+	while (readfile.get(c))
+	{
+		if (!check_valid_character(c))
+		{
+			std::cout << "Error! Invalid character in source\n";
+			return 0;
+		}
+	}
+	return 1;
 }
 
 int clean_comments(std::ifstream& readfile, std::ofstream& writefile)
@@ -124,6 +174,12 @@ int clean_comments(std::ifstream& readfile, std::ofstream& writefile)
 		}
 		// write output to our file
 		writefile << outputLine << "\n";
+	}
+	// TODO: Error check, what if we don't end a comment before end of file?
+	if (cur_state != preprocess_state::normal)
+	{
+		std::cout << "Error! Unterminated comment\n";
+		return 0;
 	}
 	readfile.close();
 	writefile.close();

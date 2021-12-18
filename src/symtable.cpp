@@ -1,7 +1,7 @@
 /*
    symtable.cpp
    implementations for symbol table
-   Tyler Weston ece467
+   Tyler Weston
 */
 
 #include "symtable.hpp"
