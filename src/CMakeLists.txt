@@ -1,6 +1,7 @@
 
 
 set(SOURCES
+	argsparse.cpp
 	compiler.cpp
 	common.cpp
 	nodes.cpp
