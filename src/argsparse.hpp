@@ -13,5 +13,6 @@ struct cmd_line_args
 
 int parse_commands(int, char**, cmd_line_args*);
 void usage();
+void version_info();
 
 #endif // CCC_ARGPARSE_HPP_INCLUDED

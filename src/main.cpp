@@ -71,7 +71,7 @@ What other operators are there?
 using namespace std::string_literals;
 
 int main(int argc, char** argv) {
-	std::cout << "cimple c compiler - Tyler Weston - 2020\n";
+	std::cout << "cimple c compiler - Tyler Weston - 2020/2021\n";
  	cmd_line_args cmds;
 	parse_commands(argc, argv, &cmds);
 	// make sure we got a file
