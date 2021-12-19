@@ -231,12 +231,6 @@ void OptimizeVisitor::visit(BinaryOpNode* n)
 				case BinaryOps::Mod:
 					op = _mod<int>;
 					break;
-				case BinaryOps::LogAnd:
-					op = _land<int>;
-					break;
-				case BinaryOps::LogOr:
-					op = _lor<int>;
-					break;
 				case BinaryOps::BitAnd:
 					op = _band<int>;
 					break;
