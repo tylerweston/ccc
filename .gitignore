@@ -4,6 +4,7 @@
 /src/parser.output
 /src/parser.hpp
 /src/parser.cpp
+/src/parser.tab.cc
 CMakeCache.txt
 /src/libcccl.a
 /src/libcccrt.so
