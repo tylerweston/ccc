@@ -22,7 +22,16 @@ std::string TypeNameString(TypeName t)
 	return TypeNameStringTable[t];
 }
 
-
+std::string UnaryOpString(UnaryOps u)
+{
+	std::map<UnaryOps, std::string> UnaryOpStringTable = {
+		{UnaryOps::Minus, 	"-"},
+		{UnaryOps::Not, 	"!"},
+	};
+	if (UnaryOpStringTable.find(u) == UnaryOpStringTable.end())
+		return "undefined unary operator";
+	return UnaryOpStringTable[u];
+}
 
 std::string BinaryOpString(BinaryOps b)
 {
@@ -31,9 +40,14 @@ std::string BinaryOpString(BinaryOps b)
 		{BinaryOps::Minus, 		"-"},
 		{BinaryOps::Star, 		"*"},
 		{BinaryOps::Slash, 		"/"},
-		// {BinaryOps::Mod, 		"%"},
+		{BinaryOps::Mod, 		"%"},
 		{BinaryOps::LogAnd, 	"&&"},
 		{BinaryOps::LogOr, 		"||"},
+		{BinaryOps::BitAnd, 	"&"},
+		{BinaryOps::BitOr, 		"|"},
+		{BinaryOps::BitXor, 	"^"},
+		{BinaryOps::LeftShift, 	"<<"},
+		{BinaryOps::RightShift, ">>"},
 	};
 	if (BinaryOpStringTable.find(b) == BinaryOpStringTable.end())
 		return "undefined binary operator";

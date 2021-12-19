@@ -1,5 +1,5 @@
-; ModuleID = 'ece467'
-source_filename = "ece467"
+; ModuleID = 'ccc'
+source_filename = "ccc"
 
 define i32 @main() {
 entry:

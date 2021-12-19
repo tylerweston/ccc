@@ -155,9 +155,18 @@ false { GEN_TOK(TOK_FALSE); }
 "-" { GEN_TOK(TOK_MINUS); }
 "\*" { GEN_TOK(TOK_STAR); }
 "/" { GEN_TOK(TOK_SLASH); }
+"%" { GEN_TOK(TOK_MOD); }
 
 "&&" { GEN_TOK(TOK_LOG_AND); }
 "||" { GEN_TOK(TOK_LOG_OR); }
+
+"&" { GEN_TOK(TOK_BIT_AND); }
+"|" { GEN_TOK(TOK_BIT_OR); }
+"^" { GEN_TOK(TOK_BIT_XOR); }
+"~" { GEN_TOK(TOK_BIT_NOT); }
+
+"<<" { GEN_TOK(TOK_LEFT_SHIFT); }
+">>" { GEN_TOK(TOK_RIGHT_SHIFT); }
 
 "," { GEN_TOK(TOK_COMMA); }
 ";" {GEN_TOK(TOK_SEMICOLON); }

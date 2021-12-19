@@ -745,6 +745,18 @@ llvm::Value* CodegenVisitor::GetLLVMBinaryOpInt(BinaryOps b, llvm::Value* lhs, l
 			return this->compilationUnit->builder.CreateAnd(lhs, rhs);
 		case BinaryOps::LogOr:
 			return this->compilationUnit->builder.CreateOr(lhs, rhs);
+		case BinaryOps::Mod:
+			return this->compilationUnit->builder.CreateSRem(lhs, rhs);
+		case BinaryOps::BitAnd:
+			return this->compilationUnit->builder.CreateAnd(lhs, rhs);
+		case BinaryOps::BitOr:
+			return this->compilationUnit->builder.CreateOr(lhs, rhs);
+		case BinaryOps::BitXor:
+			return this->compilationUnit->builder.CreateXor(lhs, rhs);
+		case BinaryOps::LeftShift:
+			return this->compilationUnit->builder.CreateShl(lhs, rhs);
+		case BinaryOps::RightShift:
+			return this->compilationUnit->builder.CreateAShr(lhs, rhs);
 		default:
 			llvm_unreachable("Invalid binary operator");
 			return nullptr;
@@ -788,6 +800,10 @@ llvm::Type* CodegenVisitor::GetLLVMType(TypeName t)
 			return this->compilationUnit->builder.getInt1Ty();
 		case TypeName::tChar:
 			return this->compilationUnit->builder.getInt8Ty();
+		case TypeName::tShort:
+			return this->compilationUnit->builder.getHalfTy();
+		case TypeName::tLong:
+			return this->compilationUnit->builder.getInt64Ty();
 		default:
 			llvm_unreachable("Invalid type");
 			return nullptr;

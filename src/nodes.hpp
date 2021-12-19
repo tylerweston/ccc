@@ -273,8 +273,9 @@ public:
 class UnaryNode : public ExpressionNode
 {
 public:
+	UnaryOps op;
 	std::unique_ptr<ExpressionNode> expr;
-	UnaryNode(std::unique_ptr<ExpressionNode> expr);
+	UnaryNode(UnaryOps op, std::unique_ptr<ExpressionNode> expr);
 	virtual void accept(NodeVisitor* v) override;
 };
 

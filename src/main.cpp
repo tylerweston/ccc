@@ -48,15 +48,25 @@ goto
 
 const		- for optimizations, declare that variable is constant. ie, once it has been defined, we can replace all instances of it with the value.
 
-% operator
+
+% operator -needs codegen
+
 Bitwise operators:
 ^ xor operator
 & and operator
 | or operator
-~ bitwise not operator
+~ bitwise not operator (Needs to be supported by unary node)
 << left shift
 >> right shift
+- these all need codegen
+
+
 , evalute multiple expressions and return value of last one
+
+Adding new keywords:
+- tokens defined in parser.y and grammar is defined there
+- token generation rules are in lexer.l
+
 
 What other operators are there?
 

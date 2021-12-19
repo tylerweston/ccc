@@ -169,9 +169,10 @@ TernaryNode::TernaryNode(std::unique_ptr<ExpressionNode> condExpr, std::unique_p
 }
 void TernaryNode::accept(NodeVisitor* v) { v->visit(this); }
 
-UnaryNode::UnaryNode(std::unique_ptr<ExpressionNode> expr)
+UnaryNode::UnaryNode(UnaryOps op, std::unique_ptr<ExpressionNode> expr)
 {
 	this->expr = std::move(expr);
+	this->op = op;
 }
 void UnaryNode::accept(NodeVisitor* v) { v->visit(this); }
 

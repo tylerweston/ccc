@@ -63,11 +63,17 @@ template <typename T, typename... Args> static std::unique_ptr<T> make_node(yy::
 %left TOK_LOG_OR
 %left TOK_LOG_AND
 
+%left TOK_BIT_XOR TOK_BIT_AND TOK_BIT_OR
+%left TOK_BIT_NOT
+
+%left TOK_LEFT_SHIFT TOK_RIGHT_SHIFT
+
 %left TOK_EQ TOK_NE 
 %left TOK_LT TOK_GT TOK_LE TOK_GE
 
 %left TOK_PLUS TOK_MINUS
 %left TOK_STAR TOK_SLASH
+%left TOK_MOD
 
 %right TOK_PLUS_ASSIGN TOK_MINUS_ASSIGN
 %right TOK_STAR_ASSIGN TOK_SLASH_ASSIGN
@@ -320,7 +326,9 @@ maybe_expression
 
 unary_expression
 	: TOK_MINUS expression %prec HI_PREC 		
-		{ $$ = make_node<UnaryNode>(@$, $2); }	
+		{ $$ = make_node<UnaryNode>(@$, UnaryOps::Minus, $2); }	
+	| TOK_BIT_NOT expression %prec HI_PREC 		
+		{ $$ = make_node<UnaryNode>(@$, UnaryOps::Not, $2); }
 	;
 
 binary_expression
@@ -330,6 +338,12 @@ binary_expression
 	| expression TOK_SLASH expression 	{ $$ = make_node<BinaryOpNode>(@$, BinaryOps::Slash, $1, $3); }
 	| expression TOK_LOG_AND expression { $$ = make_node<LogicalOpNode>(@$, BinaryOps::LogAnd, $1, $3); }
 	| expression TOK_LOG_OR expression 	{ $$ = make_node<LogicalOpNode>(@$, BinaryOps::LogOr, $1, $3); }
+	| expression TOK_MOD expression		{ $$ = make_node<BinaryOpNode>(@$, BinaryOps::Mod, $1, $3); }
+	| expression TOK_BIT_AND expression { $$ = make_node<BinaryOpNode>(@$, BinaryOps::BitAnd, $1, $3); }
+	| expression TOK_BIT_OR expression 	{ $$ = make_node<BinaryOpNode>(@$, BinaryOps::BitOr, $1, $3); }
+	| expression TOK_BIT_XOR expression { $$ = make_node<BinaryOpNode>(@$, BinaryOps::BitXor, $1, $3); }
+	| expression TOK_LEFT_SHIFT expression { $$ = make_node<BinaryOpNode>(@$, BinaryOps::LeftShift, $1, $3); }
+	| expression TOK_RIGHT_SHIFT expression { $$ = make_node<BinaryOpNode>(@$, BinaryOps::RightShift, $1, $3); }
 	;
 
 relational_expression
