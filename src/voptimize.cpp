@@ -208,8 +208,6 @@ void OptimizeVisitor::visit(BinaryOpNode* n)
 	// now we may need to be optimized as well
 	if (n->left->isConstant && n->right->isConstant)
 	{
-		// TODO: Handle LOG AND & LOG OR
-
 		if (n->left->evaluatedType == TypeName::tInt)
 		{
 			int lvalue = dynamic_cast<ConstantIntNode*>(n->left.get())->intValue;
@@ -229,6 +227,30 @@ void OptimizeVisitor::visit(BinaryOpNode* n)
 					break;
 				case BinaryOps::Slash:
 					op = _div<int>;
+					break;
+				case BinaryOps::Mod:
+					op = _mod<int>;
+					break;
+				case BinaryOps::LogAnd:
+					op = _land<int>;
+					break;
+				case BinaryOps::LogOr:
+					op = _lor<int>;
+					break;
+				case BinaryOps::BitAnd:
+					op = _band<int>;
+					break;
+				case BinaryOps::BitOr:
+					op = _bor<int>;
+					break;
+				case BinaryOps::BitXor:
+					op = _bxor<int>;
+					break;
+				case BinaryOps::LeftShift:
+					op = _lshift<int>;
+					break;
+				case BinaryOps::RightShift:
+					op = _rshift<int>;
 					break;
 				default:
 					op = _add<int>;	// default placeholder, should never happen
@@ -328,6 +350,7 @@ void OptimizeVisitor::visit(RelationalOpNode* n)
 		return;
 	// TODO: Gotta figure out a better way to do this!
 	// is the same code a bunch of times! Maybe a template?
+	// maybe something to do with decltypes or auto or something like that?
 	// int relationals
 	if (n->left->evaluatedType == TypeName::tInt)
 	{

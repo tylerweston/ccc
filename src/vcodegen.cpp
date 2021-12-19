@@ -565,6 +565,7 @@ void CodegenVisitor::visit(WhileNode* n)
 
 void CodegenVisitor::visit(UnaryNode* n) 
 {
+	// TODO: This unary node is NOT necessarily just a negative number now, sometmes it is bitwise not
 	// evaluate the sub expression
 	// assume the type of the child is float or int since -bool or -void doesn't really make
 	// any sense!

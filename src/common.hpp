@@ -16,6 +16,8 @@ template <class T> T _sub(T a, T b) { return a - b; }
 template <class T> T _mul(T a, T b) { return a * b; }
 template <class T> T _div(T a, T b) { return a / b; }
 template <class T> T _mod(T a, T b) { return a % b; }
+template <class T> T _lshift(T a, T b) { return a << b; }
+template <class T> T _rshift(T a, T b) { return a >> b; }
 // relational, return bool
 template <class T> bool _eq(T a, T b) {	return a == b; }
 template <class T> bool _ne(T a, T b) {	return a != b; }
@@ -27,10 +29,10 @@ template <class T> bool _ge(T a, T b) {	return a >= b; }
 template <class T> bool _land(T a, T b) { return a && b; }
 template <class T> bool  _lor(T a, T b) { return a || b; }
 // bitwise operators, return type T
-template <class T> T _bw_and(T a, T b) { return a & b; }
-template <class T> T _bw_or(T a, T b) { return a | b; }
-template <class T> T _bw_xor(T a, T b) { return a ^ b; }
-template <class T> T _bw_not(T a) { return ~a; }
+template <class T> T _band(T a, T b) { return a & b; }
+template <class T> T _bor(T a, T b) { return a | b; }
+template <class T> T _bxor(T a, T b) { return a ^ b; }
+template <class T> T _bnot(T a) { return ~a; }
 
 // Forward declaration of Nodes for NodeVisitor
 class VariableNode;
