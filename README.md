@@ -15,17 +15,20 @@ The compiler supports the following C keywords:
 It supports the following types:  
 * int
 * float
-* bool
+* bool (built-in true and false)
 * void
 
 It supports the following operations:
+* Comparisons (!=, ==, <, >, <=, >=)
 * Addition (+, +=)
 * Subtraction (-, -=)
 * Multiplication (*, *=)
 * Division (/, /=)
-* Logical and (&&)
-* Logical or (||)
+* Modulo (%)
+* Logical and (&&), logical or (||)
 * Ternary expression (condition ? true expression : false expression)
+* Bitwise operators and(&), or(|), xor(^), and not(~)
+* Shift operators << and >>
     
 **ccc** consists of the following components:  
 * Preprocessor
