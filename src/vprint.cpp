@@ -10,7 +10,10 @@
 void PrintVisitor::visit(VariableNode* n) 
 {
 	this->indent();
-	std::cout << "Variable (" << n->location.begin.line << ", " << n->location.begin.column << ") { " << n->name << " }\n";
+	std::cout 	<< "Variable "
+				<< "(" << n->location.begin.line << ", " << n->location.begin.column << ") "
+				<< (n->isConstant ? " Constant " : "")
+				<< "{ " << n->name << " }\n";
 }
 
 void PrintVisitor::visit(DeclarationNode* n) 

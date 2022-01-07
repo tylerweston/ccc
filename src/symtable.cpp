@@ -15,7 +15,7 @@ SymbolTable::SymbolTable()
 	PushScope();	// start our main scope
 }
 
-bool SymbolTable::AddSymbol(std::string name, TypeName type, YYLTYPE loc)
+bool SymbolTable::AddSymbol(std::string name, TypeName type, bool isConstant, YYLTYPE loc)
 {
 	// add this symbol to the currently in scope symbol table
 	// return true if it succeeded or false if this symbol already 
@@ -28,6 +28,7 @@ bool SymbolTable::AddSymbol(std::string name, TypeName type, YYLTYPE loc)
 	SymbolTableEntry* symbolTableEntry = new SymbolTableEntry();
 	symbolTableEntry->Name = name;
 	symbolTableEntry->Type = type;
+	symbolTableEntry->isConstant = isConstant;
 	symbolTableEntry->declarationLocation = loc;
 	// add it to the current active symbol table
 	CurrentSymbolTable->insert(std::pair<std::string, SymbolTableEntry*>(name, symbolTableEntry));

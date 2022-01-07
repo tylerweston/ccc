@@ -8,12 +8,13 @@
 #include <string>
 #include <functional>
 
-// Tyler Weston # 997438170 
+// Tyler Weston
 
 /*
 Optimization pass
 
 - Simplifies binary, unary, and relational expressions whose operands are strictly constant
+TODO: Variables marked const can now be included in this optimization pass
 - if-statements with constant predicate (eliminate test, or entire statement)
 - ternary operator with constant predicate (replace with the corresponding operand)
 - while-statements with constant false predicate (eliminate the loop)
@@ -47,7 +48,16 @@ OptimizeVisitor::OptimizeVisitor()
 
 void OptimizeVisitor::visit(VariableNode* n) 
 {
-	// nothing to optimize here
+	// // TODO: If a variable is marked const, we can replace it with the value
+	// if (n->isConstant)
+	// {
+	// 	// we can replace this node with a ConstantNode with its value since
+	// 	// it's marked constant
+	// 	this->repl_expr_node = make_node<ConstantIntNode>(n->location, result);
+	// 	this->cleanTree = false;
+	// 	this->hasReplacement = true;
+	// }
+
 }
 
 void OptimizeVisitor::visit(DeclarationNode* n) 

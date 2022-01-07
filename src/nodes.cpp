@@ -45,7 +45,9 @@ ConstantDoubleNode::ConstantDoubleNode(double in)
 }
 void ConstantDoubleNode::accept(NodeVisitor* v) { v->visit(this); }
 
-VariableNode::VariableNode(std::string in): name(in) {}
+VariableNode::VariableNode(std::string in): name(in) {
+	this->isConstant = false;
+}
 void VariableNode::accept(NodeVisitor* v) { v->visit(this); }
 
 BreakNode::BreakNode() {;}

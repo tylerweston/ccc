@@ -75,6 +75,7 @@ class VariableNode : public ExpressionNode
 {
 public:
 	std::string name;
+	bool isConstant;
 	VariableNode(std::string in);
 	virtual void accept(NodeVisitor* v) override;
 };

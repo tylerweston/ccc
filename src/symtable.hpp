@@ -19,6 +19,7 @@ typedef struct
 {
 	std::string Name;				// name of symbol
 	TypeName Type;					// type of symbol
+	bool isConstant;				// is this a constant?
 	YYLTYPE declarationLocation;	// location where symbol was defined
 	// Additional attributes would go here, CONST, etc.
 	llvm::AllocaInst* val;				// use this to hold llvm specific info, usually a pointer to a memory location
@@ -49,7 +50,7 @@ public:
 	SymbolTable();
 	SymbolTableEntry* GetSymbol(std::string Symbol);
 	llvm::AllocaInst* GetLLVMValue(std::string Symbol);
-	bool AddSymbol(std::string Name, TypeName Type, YYLTYPE loc);
+	bool AddSymbol(std::string Name, TypeName Type, bool isConstant, YYLTYPE loc);
 	bool AddLLVMSymbol(std::string Name, llvm::AllocaInst* val);
 
 	void PushScope();

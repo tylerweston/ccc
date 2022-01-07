@@ -19,7 +19,7 @@ void EvaluateVisitor::visit(VariableNode* n)
 	// if it is, this expression evaluates to the type of this symbol
 	n->evaluatedType = symbolTableEntry->Type;
 	// Variables are not constant! (We don't support const)
-	n->isConstant = false;
+	n->isConstant = symbolTableEntry->isConstant;
 }
 
 void EvaluateVisitor::visit(DeclarationNode* n) 
@@ -31,7 +31,7 @@ void EvaluateVisitor::visit(DeclarationNode* n)
 		exit(1);
 	}
 	// try to add this symbol to our symbol table 
-	if (!this->symbolTable->AddSymbol(n->name, n->t, n->location))
+	if (!this->symbolTable->AddSymbol(n->name, n->t, n->isConstant, n->location))
 	{
 		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): ";
 		std::cout << "Variable " << n->name << " already declared in this scope.\n";
@@ -58,7 +58,7 @@ void EvaluateVisitor::visit(DeclAndAssignNode* n)
 		exit(1);
 	}
 	// Try to add this symbol to our symbol table
-	if (!this->symbolTable->AddSymbol(n->decl->name, n->decl->t, n->decl->location))
+	if (!this->symbolTable->AddSymbol(n->decl->name, n->decl->t, n->decl->isConstant, n->decl->location))
 	{
 		std::cout << "Error (" << n->location.begin.line << ", " << n->location.begin.column << "): ";
 		std::cout << "Variable " << n->decl->name << " already declared in this scope.\n";
