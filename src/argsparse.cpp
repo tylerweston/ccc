@@ -19,7 +19,6 @@ int parse_commands(int argc, char** argv, cmd_line_args* cmds)
         {"print-lex", no_argument, 0, 'l'},
         {"print-ir", no_argument, 0, 'i'},
         {"print-ast", no_argument, 0, 'a'},
-        {"print-tokens", no_argument, 0, 'l'},
         // {"print-pp", no_argument, 0, 'e'},
         {"optimization-level", required_argument, 0, 'o'},
         {"keep-preprocessed", no_argument, 0, 'e'},
