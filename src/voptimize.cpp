@@ -1,8 +1,8 @@
 
-#include "nodes.hpp"
-#include "bridge.hpp"
-#include "common.hpp"
-#include "voptimize.hpp"
+#include "headers/nodes.hpp"
+#include "headers/bridge.hpp"
+#include "headers/common.hpp"
+#include "headers/voptimize.hpp"
 #include <memory>
 #include <iostream>
 #include <string>

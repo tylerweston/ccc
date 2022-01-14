@@ -1,7 +1,7 @@
-#include "vcodegen.hpp"
-#include "nodes.hpp"
-#include "common.hpp"
-#include "symtable.hpp"
+#include "headers/vcodegen.hpp"
+#include "headers/nodes.hpp"
+#include "headers/common.hpp"
+#include "headers/symtable.hpp"
 #include <memory>
 #include <iostream>
 #include <string>

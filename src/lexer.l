@@ -1,10 +1,10 @@
 %{
 
 // this will be added to the top of your lexer.c file
-
-#include "bridge.hpp"
+#include "headers/nodes.hpp"	// so we can use our enum classes
+#include "headers/bridge.hpp"
 #include <string>
-#include "nodes.hpp"	// so we can use our enum classes
+
 
 #define GET_COLUMN() yyget_extra(yyscanner)
 #define SET_COLUMN(x) yyset_extra((x), yyscanner)

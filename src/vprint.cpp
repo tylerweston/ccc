@@ -1,6 +1,6 @@
-#include "vprint.hpp"
-#include "nodes.hpp"
-#include "common.hpp"
+#include "headers/vprint.hpp"
+#include "headers/nodes.hpp"
+#include "headers/common.hpp"
 #include <memory>
 #include <iostream>
 #include <string>

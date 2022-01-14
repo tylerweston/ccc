@@ -1,4 +1,4 @@
-#include "nodes.hpp"
+#include "headers/nodes.hpp"
 
 Node::~Node() = default;
 

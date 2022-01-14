@@ -7,9 +7,9 @@
 typedef void* yyscan_t;
 #endif
 
+#include "headers/nodes.hpp"
+#include "headers/common.hpp"
 #include <memory>
-#include "nodes.hpp"
-#include "common.hpp"
 
 class Node;
 
@@ -19,7 +19,7 @@ class Node;
 
 // this will be added to your parser.cpp file
 
-#include "lexer.hpp"
+#include "headers/lexer.hpp"
 
 static yy::parser::symbol_type yylex(yyscan_t);
 

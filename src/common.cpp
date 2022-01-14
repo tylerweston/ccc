@@ -1,7 +1,7 @@
 /*
 	common.cpp
 */
-#include "common.hpp"
+#include "headers/common.hpp"
 #include <map>
 #include <string>
 

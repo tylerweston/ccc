@@ -1,20 +1,20 @@
 // Given
-#include "compiler.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
+#include "headers/compiler.hpp"
+#include "headers/lexer.hpp"
+#include "parser.hpp"	// This doesn't live in headers/ because it is auto generated
 
 // Common
-#include "nodes.hpp"
-#include "common.hpp"
+#include "headers/nodes.hpp"
+#include "headers/common.hpp"
 
 // Visitors
-#include "vprint.hpp"
-#include "voptimize.hpp"
-#include "vevaluate.hpp"
-#include "vcodegen.hpp"
+#include "headers/vprint.hpp"
+#include "headers/voptimize.hpp"
+#include "headers/vevaluate.hpp"
+#include "headers/vcodegen.hpp"
 
 // Symbol & Function table
-#include "symtable.hpp"
+#include "headers/symtable.hpp"
 
 // LLVM
 #include "llvm/IR/Verifier.h"

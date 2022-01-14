@@ -4,11 +4,11 @@
  * testing suites written by Stephen Keith
  */
 
-#include "compiler.hpp"
-#include "nodes.hpp"
-#include "preprocess.hpp"
-#include "main.hpp"
-#include "argsparse.hpp"
+#include "headers/compiler.hpp"
+#include "headers/nodes.hpp"
+#include "headers/preprocess.hpp"
+#include "headers/main.hpp"
+#include "headers/argsparse.hpp"
 #include <string>
 #include <unistd.h>
 

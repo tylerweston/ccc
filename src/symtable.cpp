@@ -4,7 +4,7 @@
    Tyler Weston
 */
 
-#include "symtable.hpp"
+#include "headers/symtable.hpp"
 #include <vector>
 #include <list>
 

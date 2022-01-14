@@ -1,7 +1,7 @@
-#include "vevaluate.hpp"
-#include "nodes.hpp"
-#include "common.hpp"
-#include "symtable.hpp"
+#include "headers/vevaluate.hpp"
+#include "headers/nodes.hpp"
+#include "headers/common.hpp"
+#include "headers/symtable.hpp"
 #include <memory>
 #include <string>
 
