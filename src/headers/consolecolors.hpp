@@ -1,6 +1,6 @@
 //the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 // https://stackoverflow.com/questions/9158150/colored-output-in-c
-#ifdef __unix__ || defined(__APPLE__) || defined(__MACH__)
+#if defined(__unix__) || defined(__APPLE__) || defined(__MACH__)
 // Should work on unix or mac based systems
 #define RESET       "\033[0m"
 #define BLACK       "\033[30m"              /* Black */
