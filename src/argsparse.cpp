@@ -100,5 +100,5 @@ void version_info()
 {
     std::cout   << "ccc version 0.1\n"
                 << "By Tyler Weston\n"
-                << "2020/2021\n";
+                << "2020-2022\n";
 }

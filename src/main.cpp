@@ -9,6 +9,7 @@
 #include "headers/preprocess.hpp"
 #include "headers/main.hpp"
 #include "headers/argsparse.hpp"
+#include "headers/consolecolors.hpp"
 #include <string>
 #include <unistd.h>
 
@@ -139,7 +140,7 @@ int main(int argc, char** argv) {
 	std::unique_ptr<CompilationUnit> u = compile(root.get());
 	if (u == nullptr)
 	{
-		std::cout << "Error generating llvm IR\n";
+		std::cout << "[" << RED << "ERROR" << RESET << "] Error generating llvm IR\n";
 		return 1;
 	}
 	u->dump(cmds.filename + ".ll"s, cmds.printir);	// this will be the generated code
@@ -148,6 +149,6 @@ int main(int argc, char** argv) {
 	if (!cmds.keep_pp)
 		pp->clean_preprocess_file(cmds.filename + ".pp"s);
 
-	std::cout << "All done!\n";
+	std::cout << "[" << GREEN << "SUCCESS" << RESET << "] All done!\n";
 	return 0;
 }

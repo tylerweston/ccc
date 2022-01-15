@@ -6,6 +6,7 @@
 // Common
 #include "headers/nodes.hpp"
 #include "headers/common.hpp"
+#include "headers/consolecolors.hpp"
 
 // Visitors
 #include "headers/vprint.hpp"
@@ -27,8 +28,7 @@
 // #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 
 // Standard Libraries.
-// TODO: Change printfs to std::couts
-#include <cstdio>
+#include <iostream>
 #include <cassert>
 #include <cstring>
 
@@ -36,7 +36,7 @@ int lex(const std::string& path)
 {
 	FILE* in = fopen(path.c_str(), "r");
 	if (in == nullptr) {
-		printf("[error] unable to open file: %s\n", std::strerror(errno));
+		std::cout << "[" << RED << "error" << RESET << "] unable to open file " << path <<": " << std::strerror(errno) << "\n";
 		return 1;
 	}
 
@@ -49,7 +49,7 @@ int lex(const std::string& path)
 		yy::parser::symbol_type s;
 		int x = yylex(&s, nullptr, lexer);
 		assert(x == 1);
-		printf("[output] lexer got symbol: %s (%d, %d).\n", s.name(), s.location.begin.line, s.location.begin.column);
+		std::cout << "[" << GREEN << "output" << RESET << "] lexer got symbol: " << s.name() << " (" << s.location.begin.line << ", " << s.location.begin.column << ").\n";
 		// TODO: figure out cleaner way to print lexer output
 		// printf ("%s ", s.name());
 		// if (s.kind() == yy::parser::symbol_kind_type::S_YYEMPTY)
@@ -72,7 +72,7 @@ int parse(const std::string& path, std::unique_ptr<Node>& root)
 {
 	FILE* in = fopen(path.c_str(), "r");
 	if (in == nullptr) {
-		printf("[error] unable to open file: %s\n", std::strerror(errno));
+		std::cout << "[" << RED << "error" << RESET << "] unable to open file: " << std::strerror(errno) << "\n";
 		return 1;
 	}
 
@@ -110,12 +110,12 @@ bool verify_ast(Node* root)
 	FunctionTableEntry* mainf = evaluateVisitor.functionTable->GetFunction("main");
 	if (mainf == nullptr)
 	{
-		printf("Error: No main function found\n");
+		std::cout << "[" << RED << "error" << RESET << "] Error: No main function found\n";
 		exit(1);
 	}
 	if (mainf->ReturnType != TypeName::tInt)	// this is already checked in evaluate?
 	{
-		printf("Error: Main function needs return type int\n");
+		std::cout << "[" << RED << "error" << RESET << "] Error: Main function needs return type int\n";
 		exit(1);
 	}
 
